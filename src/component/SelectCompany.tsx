@@ -1,0 +1,59 @@
+import { useState } from "react";
+import { companyList } from "../lib/arrList";
+import { Button, Form, Modal, Select } from "antd";
+import { SyncOutlined } from "@ant-design/icons";
+
+interface SelectCompanyProps {
+  onCompanyChange: (company: string) => void;
+}
+
+const SelectCompany = ({ onCompanyChange }: SelectCompanyProps) => {
+  const [company, setCompany] = useState("");
+  const [alertCompany, setAlertCompany] = useState(false);
+
+  const handleLoadData = () => {
+    onCompanyChange(company);
+    if (!company) setAlertCompany(true);
+  };
+
+  return (
+    <div
+      style={{
+        padding: 24,
+        background: "#fff",
+        minHeight: 500,
+        justifyContent: "center",
+      }}
+      className="custom-table"
+    >
+      <p>Chọn hãng khai thác:</p>
+      <Form style={{ display: "flex", justifyContent: "space-between" }}>
+        <Select
+          style={{ width: "90%" }}
+          options={companyList}
+          showSearch
+          optionFilterProp="label"
+          onChange={(value) => setCompany(value ? String(value) : "")}
+        />
+        <Button
+          variant="outlined"
+          color="blue"
+          icon={<SyncOutlined />}
+          onClick={handleLoadData}
+        >
+          Nạp dữ liệu
+        </Button>
+      </Form>
+      <Modal
+        title="Vui lòng chọn hãng khai thác!"
+        open={alertCompany}
+        onCancel={() => setAlertCompany(false)}
+        cancelText="OK"
+      >
+        Vui lòng chọn hãng khai thác!
+      </Modal>
+    </div>
+  );
+};
+
+export default SelectCompany;
