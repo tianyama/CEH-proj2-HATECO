@@ -3,10 +3,13 @@ import SelectCompany from "../../component/SelectCompany";
 import { Col, Row } from "antd";
 import DataList from "../../component/DataList";
 import { columns } from "../../types/Container";
+import { Helmet } from 'react-helmet'
 
 export default function ContainerList() {
   const [selectedCompany, setSelectedCompany] = useState("");
   return (
+    <>
+    <Helmet><title>Hateco - Danh mục kích cỡ</title></Helmet>
     <Row
       style={{
         display: "flex",
@@ -33,5 +36,6 @@ export default function ContainerList() {
         />
       </Col>
     </Row>
+    </>
   );
 }
