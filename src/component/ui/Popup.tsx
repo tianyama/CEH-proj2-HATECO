@@ -24,6 +24,11 @@ const content = [
     title: "Xác nhận cập nhật",
     dialog: "Bạn có chắc chắn muốn thay thế dữ liệu từ file Excel?",
   },
+  {
+    button: "Xóa",
+    title: "Xác nhận xóa",
+    dialog: "Bạn chưa chọn dòng nào, nhưng có các dòng mới tạo. Bạn muốn xóa các dòng này?",
+  },
 ];
 
 export const Confirm = ({ type, onConfirm, onCancel }: ConfirmProps) => (
@@ -62,15 +67,15 @@ export const AddRowDialog = ({
       onCancel={onCancel}
     >
       <p>Nhập số dòng:</p>
-      <InputNumber
-        //type="number"
+      <Input
+        type="number"
         min={1}
         style={{ width: "96%", alignItems: "center" }}
-        value={Math.abs(value)}
+        value={value}
         onChange={(e) => {
-          if (Number(e) < 0)
-            setValue(Math.abs(Number(e)));
-          else setValue(Math.floor(Number(e)));
+          if (Number(e.target.value) < 0)
+            setValue(Math.abs(Number(e.target.value)));
+          else setValue(Math.floor(Number(e.target.value)));
         }}
       />
     </Modal>

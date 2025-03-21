@@ -1,7 +1,8 @@
 import * as XLSX from 'xlsx';
-import {Column } from "react-data-grid";
+import { AdjustColumn } from '../component/ui/column';
+import { SelectArrType } from './arrList';
 
-export const exportRawExcel = (columns: Column<any>[], filename: string) => {
+export const exportRawExcel = (columns: AdjustColumn<any>[], filename: string) => {
   const headers = columns.filter(column => column.key!='rdg-select-column').map(col => col.name);
   const worksheet = XLSX.utils.aoa_to_sheet([headers]);
   const workbook = XLSX.utils.book_new();
@@ -9,16 +10,17 @@ export const exportRawExcel = (columns: Column<any>[], filename: string) => {
   XLSX.writeFile(workbook, filename);
 };
 
-
-export const exportToExcel = (columns: Column<any>[], rows: any[], filename: string) => {
+export const exportToExcel = (columns: AdjustColumn<any>[], rows: any[], filename: string) => {
+  console.log(columns)
   const worksheetData = rows.map(row => {
     const newRow: any = {};
     columns.filter(column => column.key!='rdg-select-column').forEach(col => {
-      newRow[col.name as keyof typeof newRow] = row[col.key];
+      if (col.type == 'select') 
+        newRow[col.name as keyof typeof newRow] = col.optlist.find((option: SelectArrType) => option.value === row[col.key])?.label;
+      else newRow[col.name as keyof typeof newRow] = row[col.key];
     });
     return newRow;
   });
-
   const worksheet = XLSX.utils.json_to_sheet(worksheetData);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');

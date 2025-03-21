@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { DataGrid, RowsChangeData } from "react-data-grid";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { DataGrid, RowsChangeData, SortColumn } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import { Button, Input, Space, Upload, message, Divider, Row, Col } from "antd";
 import {
@@ -24,8 +24,8 @@ import { NoData } from "./ui/NoData";
 import * as XLSX from "xlsx";
 import { adjustColumns } from "./ui/column";
 import DataListProps from "../types/DataListProps";
-
-
+import { loadDataSelect } from "../lib/loading";
+import { SelectArrType } from "../lib/arrList";
 
 export default function DataList({
   category,
@@ -45,7 +45,7 @@ export default function DataList({
   const [changeRows, setChangeRows] = useState((): Set<string> => new Set());
   const [messageApi, contextHolder] = message.useMessage();
   const [dialog, setDialog] = useState(0);
-
+  const [sortColumns, setSortColumns] = useState<readonly SortColumn[]>([]);
   const loadData = () => {
     fetchData(category).then((data) => {
       setRowsOLD(
@@ -54,7 +54,7 @@ export default function DataList({
           rowID: index + 1,
         }))
       );
-      if (category === "containers") {
+      if (category === "size-types") {
         if (additionalVar1) {
           const filteredRows = rowsOLD.filter(
             (data) => data.operationCode === additionalVar1
@@ -79,7 +79,7 @@ export default function DataList({
 
   const search = () => {
     if (searchText === "") {
-      if (category === "containers") {
+      if (category === "size-types") {
         if (additionalVar1) {
           const filteredRows = rowsOLD.filter(
             (data) => data.operationCode === additionalVar1
@@ -93,20 +93,28 @@ export default function DataList({
         } else setRows([]);
       } else setRows(rowsOLD);
     } else {
-      const filteredRows = rowsOLD
-        .filter((data) => data.operationCode === additionalVar1)
-        .filter((row) => {
-          for (const x in columns) {
-            if (columns[x].type == "boolean") return;
-            else if (columns[x].optlist != undefined) {
-              if (
-                columns[x].optlist
-                  .find((i) => i.value == row[columns[x].key])
-                  ?.label.toLowerCase()
-                  .includes(searchText.toLowerCase())
-              )
-                return true;
-            } else if (
+      let filteredRows1 = [];
+      if (category === "containers") {
+        if (additionalVar1) {
+          filteredRows1 = rowsOLD.filter(
+            (data) => data.operationCode === additionalVar1
+          );
+        }
+      } else {
+        filteredRows1 = rowsOLD;
+      }
+      const filteredRows = filteredRows1.filter((row) => {
+        for (const x in columns) {
+          if (columns[x].optlist != undefined) {
+            if (
+              columns[x].optlist
+                .find((i) => i.value == row[columns[x].key])
+                ?.label.toLowerCase()
+                .includes(searchText.toLowerCase())
+            )
+              return true;
+          } else if (columns[x].type != "boolean") {
+            if (
               row[columns[x].key]
                 .toString()
                 .toLowerCase()
@@ -114,7 +122,8 @@ export default function DataList({
             )
               return true;
           }
-        });
+        }
+      });
       setRows(
         filteredRows.map((item, index) => ({ ...item, rowID: index + 1 }))
       );
@@ -123,7 +132,7 @@ export default function DataList({
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [additionalVar1]);
 
   useEffect(() => {
     search();
@@ -131,6 +140,7 @@ export default function DataList({
 
   const handleAddRow = (number_rows: number) => {
     addRow(
+      columns,
       number_rows,
       rows,
       newRow,
@@ -140,49 +150,70 @@ export default function DataList({
   };
 
   const okButton = () => {
-    if (dialog === 1) {
-      setDialog(0);
-      deleteRow();
-    } else if (dialog === 2) {
-      setDialog(0);
-      updateData();
-    } else if (dialog === 3) {
-      setDialog(0);
-      importFromExcel();
+    switch (dialog){
+      case 1:
+        setDialog(0);
+        deleteRow();
+        break;
+      case 2:
+        setDialog(0);
+        updateData();
+        break;
+      case 3:
+        setDialog(0);
+        importFromExcel();
+        break;
+      case 4:
+        setDialog(0);
+        loadData();
+        messageApi.success(`Đã xóa thành công!`);
     }
   };
 
+  const handleDelete = () => {
+    const newRows = rows.filter((item) => item._id.includes("New"))
+    if (newRows.length+selectRows.size==0) {
+      messageApi.info('Vui lòng chọn dòng cần xóa!')
+    } else if (selectRows.size == 0) setDialog(4)
+      else setDialog(1)
+  }
+
   const deleteRow = async () => {
-    if (selectRows.size == 0) loadData();
-    else {
-      const rowlist = [...selectRows];
-      const remaingNewRows = rows.filter(
-        (row) => !rowlist.includes(row._id) && row._id.includes("New")
+    const rowlist = [...selectRows];
+    const remaingNewRows = rows.filter(
+      (row) => !rowlist.includes(row._id) && row._id.includes("New")
+    );
+    const deleteRows = rows
+      .filter((row) => rowlist.includes(row._id) && !row._id.includes("New"))
+      .map((row) => ({ id: row._id, rowID: row.rowID }));
+    const deleteResult = await batchDeleteItem(category, deleteRows);
+    if (deleteResult.errors.length > 0) {
+      messageApi.error(
+        `Không thể xóa các dòng:${deleteResult.errors.map(
+          (x) => x.error + ", "
+        )}`,
+        20
       );
-      const deleteRows = rows
-        .filter((row) => rowlist.includes(row._id) && !row._id.includes("New"))
-        .map((row) => ({ id: row._id, rowID: row.rowID }));
-      const deleteResult = await batchDeleteItem(category, deleteRows);
-      if (deleteResult.errors.length > 0) {
-        messageApi.error(
-          `Không thể xóa các dòng:${deleteResult.errors.map(
-            (x) => x.error + ", "
-          )}`,
-          20
-        );
-      } else {
-        messageApi.success(`Đã xóa thành công!`);
-        loadData();
-        setRows([
-          ...rows,
-          ...remaingNewRows.map((item, index) => ({
-            ...item,
-            rowID: rows.length + index + 1,
-          })),
-        ]);
-      }
+    } else {
+      messageApi.success(`Đã xóa thành công!`);
+      loadData();
+      setRows([
+        ...rows,
+        ...remaingNewRows.map((item, index) => ({
+          ...item,
+          rowID: rows.length + index + 1,
+        })),
+      ]);
     }
   };
+
+  const handleUpdate = () => {
+    const addRows = rows.filter((item) => item._id.includes("New"))
+    if (addRows.length+changeRows.size==0) {
+      messageApi.info('Không có dữ liệu cần cập nhật')
+    }
+    else setDialog(2)
+  }
 
   const updateData = async () => {
     const addData = rows
@@ -194,9 +225,19 @@ export default function DataList({
     const updateData = rows
       .filter((item) => changeRows.has(item._id))
       .map((row) => {
-        const { _id, rowID, __v, createdAt, updatedAt, ...rowData } = row;
+        const {
+          _id,
+          rowID,
+          __v,
+          createdAt,
+          updatedAt,
+          created_time,
+          updated_time,
+          ...rowData
+        } = row;
         return { id: _id, rowID: rowID, data: rowData };
       });
+    
     const addResult = await batchAddItem(category, addData);
     const updateResult = await batchUpdateItem(category, updateData);
     if (addResult.errors.length + updateResult.errors.length > 0) {
@@ -221,35 +262,26 @@ export default function DataList({
     }
   };
 
-  const handleRawExcel = () =>
-    exportRawExcel(
-      adjustColumns(columns, changeRows, rowsOLD),
-      `Mẫu ${Filename}.xlsx`
-    );
+  const handleRawExcel = () => exportRawExcel(columns, `Mẫu ${Filename}.xlsx`);
+
   const handleExportExcel = () =>
-    exportToExcel(
-      adjustColumns(columns, changeRows, rowsOLD),
-      rows,
-      `${Filename}.xlsx`
-    );
+    exportToExcel(columns, rows, `${Filename}.xlsx`);
 
   const importFromExcel = () => {
     if (!file) return;
     const reader = new FileReader();
-    console.log(reader);
     reader.onload = (e) => {
-      const data = new Uint8Array(e.target?.result as ArrayBuffer);
-      const workbook = XLSX.read(data, { type: "array" });
+      const data = e.target.result;
+      const workbook = XLSX.read(data);
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
       const headers = jsonData[0] as string[];
       const rowsData = jsonData.slice(1);
-
       const newRows = rowsData.map((row) => {
         const rowData: any = {};
         headers.forEach((header, i) => {
-          const column = adjustColumns(columns, changeRows, rowsOLD).find(
+          const column = adjustColumns(columns).find(
             (col) => col.name === header
           );
           if (column) {
@@ -287,7 +319,6 @@ export default function DataList({
   };
 
   const checkFileType = (file: File) => {
-    console.log(file.type);
     const isXLSX =
       file.type ==
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
@@ -317,6 +348,46 @@ export default function DataList({
     );
   };
 
+  const onSortColumnsChange = useCallback((sortColumns: SortColumn[]) => {
+    setSortColumns(sortColumns.slice(-1));
+  }, []);
+
+  const sortedRows = useMemo(() => {
+    if (sortColumns.length === 0) return rows;
+    const { columnKey, direction } = sortColumns[0];
+    let sortedRows = [...rows];
+    switch (columns.find((x) => x.key == columnKey)?.type) {
+      case "boolean":
+      case "number":
+        sortedRows = sortedRows.sort((a, b) => a[columnKey] - b[columnKey]);
+        break;
+      case "date":
+        sortedRows = sortedRows.sort(
+          (a, b) =>
+            new Date(a[columnKey]).getTime() - new Date(b[columnKey]).getTime()
+        );
+        break;
+      case "select": {
+        const ss = columns.find((x) => x.key == columnKey)?.optlist;
+        if (ss) {
+          sortedRows = sortedRows.sort((a, b) =>
+            (
+              ss.find((x) => x.value == a[columnKey])?.label || ""
+            ).localeCompare(
+              ss.find((x) => x.value == b[columnKey])?.label || ""
+            )
+          );
+        }
+        break;
+      }
+      default:
+        sortedRows = sortedRows.sort((a, b) =>
+          a[columnKey].localeCompare(b[columnKey])
+        );
+    }
+    return direction === "DESC" ? sortedRows.reverse() : sortedRows;
+  }, [rows, sortColumns]);
+
   const ButtonZone = (buttonList: string[]) => (
     <Space
       style={{ marginBottom: 16 }}
@@ -338,7 +409,7 @@ export default function DataList({
           variant="outlined"
           color="red"
           icon={<DeleteOutlined />}
-          onClick={() => setDialog(1)}
+          onClick={handleDelete}
         >
           Xóa
         </Button>
@@ -348,7 +419,7 @@ export default function DataList({
           variant="outlined"
           color="green"
           icon={<SaveOutlined />}
-          onClick={() => setDialog(2)}
+          onClick={handleUpdate}
         >
           Lưu
         </Button>
@@ -367,7 +438,7 @@ export default function DataList({
           beforeUpload={checkFileType}
           accept={".xlsx, .xls"}
           onChange={handleFileChange}
-          showUploadList={true}
+          showUploadList={false}
         >
           <Button type="default" icon={<ImportOutlined />}>
             Nhập Excel
@@ -387,7 +458,7 @@ export default function DataList({
   );
 
   return (
-    <div style={{ padding: 24, background: "#fff", minHeight: 400 }}>
+    <div style={{ padding: 24, background: "#fff", minHeight: 500 }}>
       {contextHolder}
       <Row>
         <Col span={8}>
@@ -406,9 +477,11 @@ export default function DataList({
       <DataGrid
         className="hearder-bg"
         style={{ width: "100%" }}
-        columns={adjustColumns(columns, changeRows, rowsOLD)}
-        rows={rows}
+        columns={adjustColumns(columns)}
+        rows={sortedRows}
         rowKeyGetter={(row) => row._id}
+        sortColumns={sortColumns}
+        onSortColumnsChange={onSortColumnsChange}
         onRowsChange={handleEdit}
         selectedRows={selectRows}
         onSelectedRowsChange={setSelectRows}

@@ -1,13 +1,18 @@
-import { useState } from "react";
-import { companyList } from "../lib/arrList";
+import { useEffect, useState } from "react";
+import { companyList2, SelectArrType } from "../lib/arrList";
 import { Button, Form, Modal, Select } from "antd";
 import { SyncOutlined } from "@ant-design/icons";
+import { loadDataSelect } from "../lib/loading";
 
 interface SelectCompanyProps {
+  companyList: SelectArrType[];
   onCompanyChange: (company: string) => void;
 }
 
-const SelectCompany = ({ onCompanyChange }: SelectCompanyProps) => {
+const SelectCompany = ({
+  companyList,
+  onCompanyChange,
+}: SelectCompanyProps) => {
   const [company, setCompany] = useState("");
   const [alertCompany, setAlertCompany] = useState(false);
 
@@ -24,20 +29,21 @@ const SelectCompany = ({ onCompanyChange }: SelectCompanyProps) => {
         minHeight: 500,
         justifyContent: "center",
       }}
-      className="custom-table"
     >
       <p>Chọn hãng khai thác:</p>
-      <Form style={{ display: "flex", justifyContent: "space-between" }}>
+      <Form style={{ display: "block", alignItems: "center" }}>
         <Select
           style={{ width: "90%" }}
           options={companyList}
+          defaultValue={companyList}
           showSearch
           optionFilterProp="label"
           onChange={(value) => setCompany(value ? String(value) : "")}
         />
         <Button
+          style={{ alignItems: "center", marginTop: 20 }}
           variant="outlined"
-          color="blue"
+          color="orange"
           icon={<SyncOutlined />}
           onClick={handleLoadData}
         >

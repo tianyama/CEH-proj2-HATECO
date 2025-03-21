@@ -1,5 +1,6 @@
-import { companyList } from "../lib/arrList";
 import { AdjustColumn } from "../component/ui/column";
+import { SelectArrType } from "../lib/arrList";
+import { loadDataSelect } from "../lib/loading";
 
 export default interface Container {
   _id: string;
@@ -11,11 +12,12 @@ export default interface Container {
   emptyCargoTypeCode: string;
 }
 
+export const companyList: SelectArrType[] = await loadDataSelect("operations");
+
 export const columns: AdjustColumn[] = [
   {
     key: "operationCode",
     name: "Hãng khai thác",
-    width: "18%",
     type: "select",
     optlist: companyList,
   },

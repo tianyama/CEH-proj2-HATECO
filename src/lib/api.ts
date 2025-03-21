@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "https://be-size-container-api.onrender.com";
 
-const batchSize: number = 3;
+const BATCH_SIZE: number = 3;
 
 export const fetchData = async (category: string) => {
   try {
@@ -32,10 +32,10 @@ export const deleteItem = async (category: string, id: string) => {
   await axios.delete(`${API_URL}/${category}/${id}`);
 };
 
-const spiltArray = (array: any[], size: number) => {
+const spiltArray = (array: any[]) => {
   const chunks = [];
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size));
+  for (let i = 0; i < array.length; i += BATCH_SIZE) {
+    chunks.push(array.slice(i, i + BATCH_SIZE));
   }
   return chunks;
 };
@@ -46,7 +46,7 @@ export const batchAddItem = async (
 ) => {
   const errors: { rowID: number, data: object, error: unknown }[] = [];
   const successes: { rowID: number; data: object }[] = [];
-  for (const i of spiltArray(data, batchSize)) {
+  for (const i of spiltArray(data)) {
     const promises = i.map(async (item) => {
       try {
         const data = await addItem(category, item.data);
@@ -57,7 +57,6 @@ export const batchAddItem = async (
     })
     await Promise.allSettled(promises);
   };
-  console.log({ successes, errors });
   return ({ successes, errors });
 };
 
@@ -67,7 +66,7 @@ export const batchUpdateItem = async (
 ) => {
   const errors: { rowID: number, data: object, error: unknown }[] = [];
   const successes: { rowID: number; data: object }[] = [];
-  for (const i of spiltArray(data, batchSize)) {
+  for (const i of spiltArray(data)) {
     const promises = i.map(async (item) => {
       try {
         const data = await updateItem(category, item.id, item.data);
@@ -78,7 +77,6 @@ export const batchUpdateItem = async (
     })
     await Promise.allSettled(promises);
   };
-  console.log({ successes, errors });
   return ({ successes, errors });
 };
 
@@ -88,7 +86,7 @@ export const batchDeleteItem = async (
 ) => {
   const errors: { rowID: number; error: unknown }[] = [];
   const successes: { rowID: number }[] = [];
-  for (const i of spiltArray(list, batchSize)) {
+  for (const i of spiltArray(list)) {
     const promises = i.map(async (item) => {
       try {
         await deleteItem(category, item.id);
@@ -99,6 +97,5 @@ export const batchDeleteItem = async (
     })
     await Promise.allSettled(promises);
   };
-  console.log({ successes, errors });
   return { successes, errors };
 };

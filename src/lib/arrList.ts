@@ -3,10 +3,15 @@ export interface SelectArrType {
   label: string,
 }
 
-export const companyList: SelectArrType[] = [
+export const companyList2: SelectArrType[] = [
   { value: 'HLC', label: 'Hapag-Lloyd' },
   { value: 'MMA', label: 'Mediterranean Shipping Company' },
   { value: 'CMA', label: 'CMA CGM' },
+];
+
+export const isForeignList: SelectArrType[] = [
+  { value: 'D', label: 'Nội' },
+  { value: 'F', label: 'Ngoại' },
 ];
 
 export const extraModeList: SelectArrType[] = [
@@ -25,4 +30,12 @@ export const roundingList: SelectArrType[] = [
 export const moneyCreditList: SelectArrType[] = [
   { value: 'C', label: 'Thu sau' },
   { value: 'M', label: 'Thu ngay' },
+]
+
+export const bookingStatusList: SelectArrType[] = [
+  { value: 0, label: 'Chưa cấp' },
+  { value: 1, label: 'Đã cấp hết' },
+  { value: 2, label: 'Hết hạn' },
+  { value: 3, label: 'Đã hủy' },
+  { value: 4, label: 'Đang cấp' },
 ]

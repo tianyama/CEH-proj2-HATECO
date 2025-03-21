@@ -2,23 +2,19 @@ import { Layout } from "antd";
 import HeaderZone from "./component/Header";
 import Footer from "./component/Footer";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
-import LanguageList from "./pages/category/LanguageList";
-import JobModeList from "./pages/category/JobModeList";
-import ReferList from "./pages/config/ReferList";
-import ContainerList from "./pages/category/ContainerList";
 import Home from "./pages/Home";
 import E404 from "./pages/E404";
-import { Helmet } from "react-helmet";
+import { ArrCategories } from "./lib/listcategories";
 
 const { Header, Content } = Layout;
 
-const HeadFoot = () => (
+const AppLayout = () => (
   <>
     <HeaderZone />
     <Outlet />
     <Footer />
   </>
-)
+);
 
 export default function App() {
   return (
@@ -27,12 +23,12 @@ export default function App() {
         <Content style={{ backgroundColor: "#f4f4f4" }}>
           <Routes>
             <Route path="*" element={<E404 />} />
-            <Route element={<HeadFoot />}>
+            <Route element={<AppLayout />}>
               <Route index element={<Home />} />
-              <Route path="/category/container" element={<ContainerList />} />
-              <Route path="/category/language" element={<LanguageList />} />
-              <Route path="/category/job-mode" element={<JobModeList />} />
-              <Route path="/config/refer" element={<ReferList />} />
+              {ArrCategories.map(({ sub }) =>
+                sub.filter(({ page }) => page != undefined)
+                  .map(({ link, page }) => <Route path={link} element={page} />)
+              )}
             </Route>
           </Routes>
         </Content>

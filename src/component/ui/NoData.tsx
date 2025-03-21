@@ -2,7 +2,7 @@ import { Empty, Spin } from "antd";
 
 export const NoData = (rows: object[]) => ({
   noRowsFallback: (
-    <div className="no-data-table">
+    <div style={{ textAlign: "center", gridColumn: "1/-1", alignSelf: "center" }}>
       <Spin spinning={rows.length == 0} size="large">
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}

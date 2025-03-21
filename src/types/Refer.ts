@@ -1,4 +1,4 @@
-import { companyList, roundingList, moneyCreditList } from "../lib/arrList";
+import { companyList2, roundingList, moneyCreditList } from "../lib/arrList";
 import { AdjustColumn } from "../component/ui/column";
 
 export interface Refer {
@@ -18,7 +18,7 @@ export const columns: AdjustColumn[] = [
     name: "Hãng khai thác",
     width: "18%",
     type: "select",
-    optlist: companyList,
+    optlist: companyList2,
   },
   { key: "applyDate", name: "Ngày hiệu lực", value: new Date(), type: "date" },
   { key: "expireDate", name: "Ngày hết hạn", value: new Date(), type: "date" },

@@ -6,9 +6,10 @@ import {
   RowsChangeData,
 } from "react-data-grid";
 
-export const newRow = (rows: object[], i: number) => ({
+export const newRow = (columns: AdjustColumn[], rows: object[], i: number) => ({
   _id: "New" + (rows.length + i + 1).toString(),
   rowID: rows.length + i + 1,
+  ...columns.reduce((acc, col) => ({ ...acc, [col.key]: col.value }), {}),
 });
 
 export const paramData = (
@@ -16,15 +17,16 @@ export const paramData = (
 ) => params.row[params.column.key];
 
 export const addRow = (
+  columns: AdjustColumn[],
   number_rows: number,
   rows: object[],
-  newRow: (rows: object[], i: number) => object,
+  newRow: (columns: AdjustColumn[], rows: object[], i: number) => object,
   setRows: (row: object[]) => void,
   setAddRowDialog: (dialog: boolean) => void
 ) => {
   const newRows = [];
   for (let i = 0; i < number_rows; i++) {
-    newRows.push(newRow(rows, i));
+    newRows.push(newRow(columns, rows, i));
   }
   setRows([...rows, ...newRows]);
   setAddRowDialog(false);

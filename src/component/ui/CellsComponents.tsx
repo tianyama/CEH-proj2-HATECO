@@ -2,19 +2,15 @@ import { Checkbox, Select, DatePicker, InputNumber } from "antd";
 import { RenderCellProps, RenderEditCellProps } from "react-data-grid";
 import { paramData, changeValue } from "../../lib/updateTable";
 import { SelectArrType } from "../../lib/arrList";
-import { AdjustColumn } from "./column";
 import dayjs from "dayjs";
 
 export const CheckBoxCell = (
-  columns: AdjustColumn[],
   params: RenderCellProps<any>,
-  changeRows: Set<string>,
-  rowOLD: any[]
 ) => (
   <Checkbox
     defaultChecked={Boolean(paramData(params))}
     onChange={(e) => {
-      changeValue(e.target.checked, params, columns, changeRows, rowOLD);
+      params.onRowChange({ ...params.row, [params.column.key]: e.target.checked })
     }}
   />
 );
@@ -25,11 +21,8 @@ export const SelectShowCell = (
 ) => <span>{optList.find((i) => i.value == paramData(params))?.label}</span>;
 
 export const SelectCell = (
-  columns: AdjustColumn[],
   params: RenderEditCellProps<object>,
   optList: SelectArrType[],
-  changeRows: Set<string>,
-  rowOLD: any[]
 ) => (
   <Select
     options={optList}
@@ -37,9 +30,9 @@ export const SelectCell = (
     optionFilterProp="label"
     defaultValue={paramData(params)}
     style={{ width: "100%" }}
-    onChange={(value) =>
-      changeValue(value, params, columns, changeRows, rowOLD)
-    }
+    onChange={(value) =>{
+      params.onRowChange({ ...params.row, [params.column.key]: value }, true)
+    }}
   />
 );
 
@@ -59,10 +52,7 @@ export const DateShowCell = (params: RenderCellProps<any>) => (
 );
 
 export const DateEditCell = (
-  columns: AdjustColumn[],
   params: RenderEditCellProps<any>,
-  changeRows: Set<string>,
-  rowOLD: any[]
 ) => (
   <DatePicker
     defaultValue={dayjs(paramData(params))}
@@ -70,17 +60,20 @@ export const DateEditCell = (
     format={"YYYY-MM-DD HH:mm:ss"}
     showTime={{ format: "HH:mm:ss" }}
     onChange={(date) => {
+      if (params.column.key == "expireDate") {
+        if (date < dayjs(params.row.applyDate)) {
+          alert('Ngày hết hạn phải lớn hơn ngày hiệu lực')
+          return
+        }
+      }
       const value = date.toISOString() as unknown as Date;
-      changeValue(value, params, columns, changeRows, rowOLD);
+      params.onRowChange({ ...params.row, [params.column.key]: value }, true);
     }}
   />
 );
 
 export const NumEditCell = (
-  columns: AdjustColumn[],
   params: RenderEditCellProps<any>,
-  changeRows: Set<string>,
-  rowOLD: any[]
 ) => (
   <InputNumber
     defaultValue={paramData(params)}
@@ -90,3 +83,4 @@ export const NumEditCell = (
     }}
   />
 );
+

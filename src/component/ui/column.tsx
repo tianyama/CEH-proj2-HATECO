@@ -17,17 +17,13 @@ export interface AdjustColumn extends Column<any> {
 export const RowIDColumn: Column<any> = {
   key: "rowID",
   name: "STT",
-  width: "5%",
+  width: "50px",
   headerCellClass: "rtd-header-text",
   cellClass: "rtd-text",
+  sortable: false,
 };
 
-const adjustColumn = (
-  columns: AdjustColumn[],
-  column: AdjustColumn,
-  changeRows: Set<string>,
-  rowOLD: any[]
-): Column<any> => {
+const adjustColumn = (column: AdjustColumn): Column<any> => {
   const baseColumn: Column<any> = {
     key: column.key,
     name: column.name,
@@ -48,22 +44,19 @@ const adjustColumn = (
     case "boolean":
       return {
         ...baseColumn,
-        renderCell: (params) =>
-          CheckBoxCell(columns, params, changeRows, rowOLD),
+        renderCell: (params) => CheckBoxCell(params),
       };
     case "date":
       return {
         ...baseColumn,
         renderCell: (params) => DateShowCell(params),
-        renderEditCell: (params) =>
-          DateEditCell(columns, params, changeRows, rowOLD),
+        renderEditCell: (params) => DateEditCell(params),
       };
     case "select":
       return {
         ...baseColumn,
         renderCell: (params) => SelectShowCell(params, column.optlist || []),
-        renderEditCell: (params) =>
-          SelectCell(columns, params, column.optlist || [], changeRows, rowOLD),
+        renderEditCell: (params) => SelectCell(params, column.optlist || []),
       };
     default:
       break;
@@ -71,12 +64,6 @@ const adjustColumn = (
   return baseColumn;
 };
 
-export const adjustColumns: (
-  columns: AdjustColumn[],
-  changeRows: Set<string>,
-  rowsOLD: any[]
-) => Column<any>[] = (columns, changeRows, rowOLD) => [
-  SelectColumn,
-  RowIDColumn,
-  ...columns.map((item) => adjustColumn(columns, item, changeRows, rowOLD)),
-];
+export const adjustColumns: (columns: AdjustColumn[]) => Column<any>[] = (
+  columns
+) => [SelectColumn, RowIDColumn, ...columns.map((item) => adjustColumn(item))];
