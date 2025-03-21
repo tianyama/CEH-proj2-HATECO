@@ -58,8 +58,6 @@ const adjustColumn = (column: AdjustColumn): Column<any> => {
         renderCell: (params) => SelectShowCell(params, column.optlist || []),
         renderEditCell: (params) => SelectCell(params, column.optlist || []),
       };
-    default:
-      break;
   }
   return baseColumn;
 };

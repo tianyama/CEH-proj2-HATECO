@@ -5,12 +5,12 @@ import { SelectArrType } from "../../lib/arrList";
 import dayjs from "dayjs";
 
 export const CheckBoxCell = (
-  params: RenderCellProps<any>,
+  { row, column, onRowChange }: RenderCellProps<any>,
 ) => (
   <Checkbox
-    defaultChecked={Boolean(paramData(params))}
+    defaultChecked={Boolean(row[column.key])}
     onChange={(e) => {
-      params.onRowChange({ ...params.row, [params.column.key]: e.target.checked })
+      onRowChange({ ...row, [column.key]: e.target.checked })
     }}
   />
 );
@@ -21,17 +21,17 @@ export const SelectShowCell = (
 ) => <span>{optList.find((i) => i.value == paramData(params))?.label}</span>;
 
 export const SelectCell = (
-  params: RenderEditCellProps<object>,
+  { row, column, onRowChange }: RenderEditCellProps<object>,
   optList: SelectArrType[],
 ) => (
   <Select
     options={optList}
     showSearch
     optionFilterProp="label"
-    defaultValue={paramData(params)}
+    defaultValue={row[column.key as keyof typeof row]}
     style={{ width: "100%" }}
     onChange={(value) =>{
-      params.onRowChange({ ...params.row, [params.column.key]: value }, true)
+      onRowChange({ ...row, [column.key]: value }, true)
     }}
   />
 );
@@ -52,34 +52,33 @@ export const DateShowCell = (params: RenderCellProps<any>) => (
 );
 
 export const DateEditCell = (
-  params: RenderEditCellProps<any>,
+  { row, column, onRowChange }: RenderEditCellProps<any>,
 ) => (
   <DatePicker
-    defaultValue={dayjs(paramData(params))}
+    defaultValue={dayjs(row[column.key])}
     style={{ width: "100%", textAlign: "center" }}
     format={"YYYY-MM-DD HH:mm:ss"}
     showTime={{ format: "HH:mm:ss" }}
     onChange={(date) => {
-      if (params.column.key == "expireDate") {
-        if (date < dayjs(params.row.applyDate)) {
+      if (column.key == "expireDate") {
+        if (date < dayjs(row.applyDate)) {
           alert('Ngày hết hạn phải lớn hơn ngày hiệu lực')
           return
         }
       }
-      const value = date.toISOString() as unknown as Date;
-      params.onRowChange({ ...params.row, [params.column.key]: value }, true);
+      onRowChange({ ...row, [column.key]: date.toISOString() }, true);
     }}
   />
 );
 
 export const NumEditCell = (
-  params: RenderEditCellProps<any>,
+  { row, column, onRowChange }: RenderEditCellProps<any>,
 ) => (
   <InputNumber
-    defaultValue={paramData(params)}
+    defaultValue={row[column.key]}
     style={{ width: "100%", textAlign: "center" }}
     onChange={(value) => {
-      changeValue(value, params, columns, changeRows, rowOLD);
+      onRowChange({ ...row, [column.key]: value }, true);
     }}
   />
 );
