@@ -9,6 +9,7 @@ export default function Refer() {
         <title>Hateco - Cấu hình sử dụng điện</title>
       </Helmet>
       <DataList
+        tableMode="editrow"
         category="refers"
         columns={columns}
         buttonList={["add", "delete", "save", "download"]}

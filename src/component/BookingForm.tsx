@@ -24,6 +24,7 @@ import { bkFormList, bkSearchFrm } from "../lib/bookingFormList";
 import VesselChooser from "./VesselChooser";
 import ContainerChooser from "./ContainerChooser";
 import Vessel from "../types/Vessel";
+import BookingSearch from "../types/BookingSearch";
 
 interface BookingFormProps {
   getParam: (value: any) => void;
@@ -42,11 +43,11 @@ const BookingIOLoad = ({ getParam }: BookingFormProps) => {
     form.setFieldValue("BL_vesselKey", value.vesselName);
   };
 
-  const onFinish = (v: FormProps<any>["onFinish"]) => {
+  const onFinish = (v: FormProps<BookingSearch>["onFinish"]) => {
     getParam(
-      (v.BL_company ? "&operationCode=" + v.BL_company : "") +
-        (v.BL_fromDate ? "&fromDate=" + v.BL_fromDate.toISOString() : "") +
-        (v.BL_toDate ? "&toDate=" + v.BL_toDate.toISOString() : "")
+      (v?.BL_company ? "&operationCode=" + v.BL_company : "") +
+        (v?.BL_fromDate ? "&fromDate=" + v.BL_fromDate.toISOString() : "") +
+        (v?.BL_toDate ? "&toDate=" + v.BL_toDate.toISOString() : "")
     );
   };
 

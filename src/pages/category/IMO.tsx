@@ -9,6 +9,7 @@ export default function IMO() {
         <title>Hateco - Danh mục IMO</title>
       </Helmet>
       <DataList
+        tableMode="editrow"
         category="imos"
         columns={columns}
         buttonList={["add", "delete", "save", "template", "upload", "download"]}

@@ -369,12 +369,12 @@ export default function DataList({
     setIsEditModalOpen(false);
   };
   
-  const ButtonZone = (buttonList: string[]) => (
+  const ButtonZone = (buttonList?: string[]) => (
     <Space
         size={1}
       split={<Divider type="vertical" />}
     >
-      {buttonList.includes("add") ? (
+      {buttonList?.includes("add") ? (
         <Button
           variant="outlined"
           color="blue"
@@ -384,7 +384,7 @@ export default function DataList({
           Thêm dòng
         </Button>
       ) : null}
-      {buttonList.includes("delete") ? (
+      {buttonList?.includes("delete") ? (
         <Button
           variant="outlined"
           color="red"
@@ -394,7 +394,7 @@ export default function DataList({
           Xóa
         </Button>
       ) : null}
-      {buttonList.includes("save") ? (
+      {buttonList?.includes("save") ? (
         <Button
           variant="outlined"
           color="green"
@@ -404,7 +404,7 @@ export default function DataList({
           Lưu
         </Button>
       ) : null}
-      {buttonList.includes("template") ? (
+      {buttonList?.includes("template") ? (
         <Button
           type="default"
           icon={<FileExcelOutlined />}
@@ -413,7 +413,7 @@ export default function DataList({
           Excel mẫu
         </Button>
       ) : null}
-      {buttonList.includes("upload") ? (
+      {buttonList?.includes("upload") ? (
         <Upload
           beforeUpload={checkFileType}
           accept={".xlsx, .xls"}
@@ -425,7 +425,7 @@ export default function DataList({
           </Button>
         </Upload>
       ) : null}
-      {buttonList.includes("download") ? (
+      {buttonList?.includes("download") ? (
         <Button
           type="default"
           icon={<ExportOutlined />}

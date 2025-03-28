@@ -9,6 +9,7 @@ export default function Country() {
         <title>Hateco - Danh mục quốc gia</title>
       </Helmet>
       <DataList
+        tableMode="editrow"
         category="countries"
         columns={columns}
         buttonList={["add", "delete", "save", "template", "upload", "download"]}

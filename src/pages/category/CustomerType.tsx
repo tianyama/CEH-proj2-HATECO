@@ -9,6 +9,7 @@ export default function CustomerType() {
         <title>Hateco - Danh mục loại khách hàng</title>
       </Helmet>
       <DataList
+        tableMode="editrow"
         category="customer-types"
         columns={columns}
         buttonList={["add", "delete", "save", "template", "upload", "download"]}

@@ -40,6 +40,7 @@ export default function ContainerSize() {
         </Col>
         <Col span={17}>
           <DataList
+            tableMode="editrow"
             category="size-types"
             columns={columns}
             buttonList={[

@@ -9,6 +9,7 @@ export default function Vessel () {
         <title>Hateco - Danh mục tàu</title>
       </Helmet>
       <DataList
+        tableMode="editrow"
         category="vessels"
         columns={columns}
         buttonList={["add", "delete", "save", "template", "upload", "download"]}

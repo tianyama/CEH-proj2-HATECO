@@ -16,7 +16,7 @@ export interface AdjustColumn extends Column<any> {
   value?: string | number | boolean | Date | null;
 }
 
-export const RowIDColumn: Column<any> = {
+const RowIDColumn: Column<any> = {
   key: "rowID",
   name: "STT",
   width: "50px",
@@ -24,7 +24,7 @@ export const RowIDColumn: Column<any> = {
   cellClass: "rtd-text",
 };
 
-export const EditButtonColumn: (func: (x: any)=>void)=>Column<any> = (takeEditRow) =>
+const EditButtonColumn: (func: (x: any)=>void)=>Column<any> = (takeEditRow) =>
 ({
   key: "editButton",
   name: "Điều chỉnh",
@@ -48,11 +48,11 @@ export const EditButtonColumn: (func: (x: any)=>void)=>Column<any> = (takeEditRo
   ),
 })
 
-const adjustColumn = (column: AdjustColumn, mode?: string): Column<any> => {
+const adjustColumn = (column: AdjustColumn, mode: string): Column<any> => {
   const baseColumn: Column<any> = {
     key: column.key,
     name: column.name,
-    editable: (mode!=null) ? false : column.editable,
+    editable: (mode=="editrow") ? column.editable : false,
     width: column.width,
     headerCellClass: "rtd-header-text",
     cellClass: ["boolean", "date"].includes(column.type)
@@ -89,10 +89,11 @@ const adjustColumn = (column: AdjustColumn, mode?: string): Column<any> => {
 
 export const adjustColumns: (
   columns: AdjustColumn[],
-  mode?: string,
+  mode: string,
   takeEditRow?: any
 ) => Column<any>[] = (columns, mode?, takeEditRow?) =>
-    mode == "editform" ? [EditButtonColumn(takeEditRow), ...columns.map((item) => adjustColumn(item, mode))]
+    mode == "editrow" ? [SelectColumn, RowIDColumn, ...columns.map((item) => adjustColumn(item, mode))]
+  : mode == "editform" ? [EditButtonColumn(takeEditRow), ...columns.map((item) => adjustColumn(item, mode))]
   : mode == "choose" ? [RowIDColumn, ...columns.map((item) => adjustColumn(item, mode))]
   : mode == "multiselect" ? [SelectColumn, RowIDColumn, ...columns.map((item) => adjustColumn(item, mode))]
-  : [SelectColumn, RowIDColumn, ...columns.map((item) => adjustColumn(item))];
+  : []

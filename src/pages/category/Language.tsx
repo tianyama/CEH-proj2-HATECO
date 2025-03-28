@@ -9,6 +9,7 @@ export default function Language() {
         <title>Hateco - Danh mục ngôn ngữ</title>
       </Helmet>
       <DataList
+        tableMode="editrow"
         category="languages"
         columns={columns}
         buttonList={["add", "delete", "save", "template", "upload", "download"]}

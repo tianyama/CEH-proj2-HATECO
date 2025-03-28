@@ -9,6 +9,7 @@ export default function Operation () {
         <title>Hateco - Danh mục ngôn ngữ</title>
       </Helmet>
       <DataList
+        tableMode="editrow"
         category="operations"
         columns={columns}
         buttonList={["add", "delete", "save", "template", "upload", "download"]}

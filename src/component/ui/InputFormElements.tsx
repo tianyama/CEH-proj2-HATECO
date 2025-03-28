@@ -120,6 +120,7 @@ export const SelectElement = ({
         options={optlist}
         showSearch
         optionFilterProp="label"
+        allowClear
       />
     </Form.Item>
   </Col>

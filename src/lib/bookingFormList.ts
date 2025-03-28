@@ -97,6 +97,7 @@ export const bkFormList = [
     name1: "S_bookingNo",
     label: "Số booking",
     attribute: "bookingNo",
+    required: true
   },
   {
     type: "select",
@@ -105,6 +106,7 @@ export const bkFormList = [
     label: "Hãng khai thác",
     optlist: operationList??[],
     attribute: "operationCode",
+    required: true
   },
   {
     type: "select",
@@ -112,6 +114,7 @@ export const bkFormList = [
     name1: "S_containersize",
     label: "Kích cỡ",
     attribute: "isoSizetype",
+    required: true
   },
   {
     type: "number",
@@ -119,6 +122,7 @@ export const bkFormList = [
     name1: "S_bookingAmount",
     label: "Số lượng",
     attribute: "bookingAmount",
+    required: true
   },
   {
     type: "seltable",
@@ -128,6 +132,7 @@ export const bkFormList = [
     attribute: "containerNo",
     width: 24,
     optTable: 'ContainerTable',
+    required: true
   },
   {
     type: "seltable",
@@ -137,6 +142,7 @@ export const bkFormList = [
     attribute: "vesselKey",
     width: 24,
     optTable: 'VesselTable',
+    required: true
   },
   {
     type: "select",
@@ -146,6 +152,7 @@ export const bkFormList = [
     optlist: portList??[],
     attribute: "pol",
     width: 8,
+    required: true
   },
   {
     type: "select",
@@ -155,6 +162,7 @@ export const bkFormList = [
     optlist: portList??[],
     attribute: "pod",
     width: 8,
+    required: true
   },
   {
     type: "select",
@@ -164,6 +172,7 @@ export const bkFormList = [
     optlist: portList??[],
     attribute: "fpod",
     width: 8,
+    required: true
   },
   {
     type: "string",
