@@ -5,5 +5,9 @@ export default interface DataListProps {
   columns: AdjustColumn[];
   buttonList: string[];
   Filename?: string;
+  query?: string;
   additionalVar1?: string;
+  tableMode?: string;
+  setResult?: (row: any[]|any) => void
+  resultList?: Set<any>
 }

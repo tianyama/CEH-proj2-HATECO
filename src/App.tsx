@@ -6,7 +6,7 @@ import Home from "./pages/Home";
 import E404 from "./pages/E404";
 import { ArrCategories } from "./lib/listcategories";
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 
 const AppLayout = () => (
   <>
@@ -20,7 +20,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Layout style={{ minHeight: "100vh" }}>
-        <Content style={{ backgroundColor: "#f4f4f4" }}>
+        <Content style={{ backgroundColor: "#f4f4f4", height: "100%" }}>
           <Routes>
             <Route path="*" element={<E404 />} />
             <Route element={<AppLayout />}>

@@ -1,6 +1,7 @@
 export interface SelectArrType {
   value: string | number, 
   label: string,
+  var1?: string | number,
 }
 
 export const companyList2: SelectArrType[] = [
@@ -34,8 +35,13 @@ export const moneyCreditList: SelectArrType[] = [
 
 export const bookingStatusList: SelectArrType[] = [
   { value: 0, label: 'Chưa cấp' },
-  { value: 1, label: 'Đã cấp hết' },
-  { value: 2, label: 'Hết hạn' },
-  { value: 3, label: 'Đã hủy' },
-  { value: 4, label: 'Đang cấp' },
+  { value: 1, label: 'Đang cấp' },
+  { value: 2, label: 'Đã cấp hết' },
+  { value: 3, label: 'Hết hạn' },
+  { value: 4, label: 'Đã hủy' },
+]
+
+export const bookingTypeList: SelectArrType[] = [
+  { value: 0, label: 'Cấp rỗng'},
+  { value: 1, label: 'Đóng hàng'}
 ]

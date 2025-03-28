@@ -1,6 +1,5 @@
 import { Checkbox, Select, DatePicker, InputNumber } from "antd";
 import { RenderCellProps, RenderEditCellProps } from "react-data-grid";
-import { paramData, changeValue } from "../../lib/updateTable";
 import { SelectArrType } from "../../lib/arrList";
 import dayjs from "dayjs";
 
@@ -16,19 +15,19 @@ export const CheckBoxCell = (
 );
 
 export const SelectShowCell = (
-  params: RenderCellProps<any>,
+  { row, column }: RenderCellProps<any>,
   optList: SelectArrType[]
-) => <span>{optList.find((i) => i.value == paramData(params))?.label}</span>;
+) => <span>{optList.find((i) => i.value == row[column.key])?.label}</span>;
 
 export const SelectCell = (
-  { row, column, onRowChange }: RenderEditCellProps<object>,
+  { row, column, onRowChange }: RenderEditCellProps<any>,
   optList: SelectArrType[],
 ) => (
   <Select
     options={optList}
     showSearch
     optionFilterProp="label"
-    defaultValue={row[column.key as keyof typeof row]}
+    defaultValue={row[column.key]}
     style={{ width: "100%" }}
     onChange={(value) =>{
       onRowChange({ ...row, [column.key]: value }, true)
@@ -36,9 +35,9 @@ export const SelectCell = (
   />
 );
 
-export const DateShowCell = (params: RenderCellProps<any>) => (
+export const DateShowCell = ({ row, column }: RenderCellProps<any>) => (
   <span>
-    {new Date(paramData(params))
+    {new Date(row[column.key])
       .toLocaleString("zh-CN", {
         year: "numeric",
         month: "2-digit",

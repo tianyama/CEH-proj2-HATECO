@@ -4,9 +4,9 @@ const API_URL = "https://be-size-container-api.onrender.com";
 
 const BATCH_SIZE: number = 3;
 
-export const fetchData = async (category: string) => {
+export const fetchData = async (category: string, query?: string) => {
   try {
-    const response = await axios.get(`${API_URL}/${category}?limit=null`);
+    const response = await axios.get(`${API_URL}/${category}?limit=null${query??""}`);
     return response.data.data.results;
   } catch (error) {
     console.error("Lỗi lấy dữ liệu:", error);

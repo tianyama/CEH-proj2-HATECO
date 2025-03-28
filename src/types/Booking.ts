@@ -1,5 +1,6 @@
-import { extraModeList } from "../lib/arrList";
 import { AdjustColumn } from "../component/ui/column";
+import { bookingStatusList, bookingTypeList, SelectArrType } from "../lib/arrList";
+import { loadDataSelect } from "../lib/loading";
 
 export default interface Booking {
   _id: string;
@@ -10,8 +11,8 @@ export default interface Booking {
   bookingDate: Date;
   expDate: Date;
   operationCode: string;
-  localSizetype: string;
-  isoSizetype: string;
+  localSizeType: string;
+  isoSizeType: string;
   bookingAmount: number;
   stackingAmount: number;
   shipperName:  string;
@@ -39,18 +40,19 @@ export default interface Booking {
   co2: string;
 }
 
+const companyList: SelectArrType[] = await loadDataSelect("operations");
+
 export const columns: AdjustColumn[] = [
-  { key: "bookingStatus", name: "Trạng thái", width: "15%", type: "string" },
-  { key: "bookingType", name: "Loại Booking", width: "15%", type: "string" },
+  { key: "bookingStatus", name: "Trạng thái", width: "15%", type: "select", optlist: bookingStatusList },
+  { key: "bookingType", name: "Loại Booking", width: "15%", type: "select", optlist: bookingTypeList },
   { key: "bookingNo", name: "Số booking", width: "15%", type: "string" },
-  { key: "bookingDate", name: "Ngày đăng ký", width: "15%", type: "boolean" },
-  { key: "expDate", name: "Ngày hết hạn", width: "15%", type: "boolean" },
-  { key: "operationCode", name: "Hãng KT", width: "15%", type: "select" },
+  { key: "bookingDate", name: "Ngày đăng ký", width: "15%", type: "date" },
+  { key: "expDate", name: "Ngày hết hạn", width: "15%", type: "date" },
+  { key: "operationCode", name: "Hãng KT", width: "15%", type: "select", optlist: companyList},
   { key: "localSizetype", name: "Kích cỡ", width: "15%", type: "string" },
   { key: "isoSizetype", name: "Kích cỡ ISO", type: "string" },
   { key: "bookingAmount", name: "Số lượng", type: "number" },
   { key: "stackingAmount", name: "Đã cấp", type: "number" },
   { key: "shipperName", name: "Chủ hàng", type: "string" },
-  { key: "isoSizetype", name: "Ghi chú", type: "string" },
-
+  { key: "note", name: "Ghi chú", type: "string" },
 ];

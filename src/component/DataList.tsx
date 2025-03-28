@@ -24,19 +24,21 @@ import { NoData } from "./ui/NoData";
 import * as XLSX from "xlsx";
 import { adjustColumns } from "./ui/column";
 import DataListProps from "../types/DataListProps";
-import { loadDataSelect } from "../lib/loading";
-import { SelectArrType } from "../lib/arrList";
+import BookingEditForm from "./BookingEditForm";
 
 export default function DataList({
   category,
   columns,
   buttonList,
   Filename,
-  additionalVar1,
+  query,
+  tableMode,
+  setResult,
+  resultList
 }: Readonly<DataListProps>) {
   const [rows, setRows] = useState<any[]>([]);
   const [selectRows, setSelectRows] = useState(
-    (): ReadonlySet<string> => new Set()
+    (): Set<string> => new Set()
   );
   const [rowsOLD, setRowsOLD] = useState<any[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -46,64 +48,42 @@ export default function DataList({
   const [messageApi, contextHolder] = message.useMessage();
   const [dialog, setDialog] = useState(0);
   const [sortColumns, setSortColumns] = useState<readonly SortColumn[]>([]);
+  
+  //Dành cho table có form chỉnh sửa riêng
+  const [editFormRow, setEditForm] = useState(); // Dòng được chỉnh sửa
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // Trạng thái mở modal
+
+  // Hàm mở modal và truyền dữ liệu dòng
   const loadData = () => {
-    fetchData(category).then((data) => {
+    if ((category==="booking"||category === "size-types") && !query ) {
+        setRowsOLD([]);
+        setRows([]);
+    } else {
+    fetchData(category, query).then((data) => {
       setRowsOLD(
         data.map((item: object, index: number) => ({
           ...item,
           rowID: index + 1,
         }))
       );
-      if (category === "size-types") {
-        if (additionalVar1) {
-          const filteredRows = rowsOLD.filter(
-            (data) => data.operationCode === additionalVar1
-          );
-          setRows(
-            filteredRows.map((item: object, index: number) => ({
-              ...item,
-              rowID: index + 1,
-            }))
-          );
-        } else setRows([]);
-      } else {
-        setRows(
-          data.map((item: object, index: number) => ({
-            ...item,
-            rowID: index + 1,
-          }))
-        );
-      }
-    });
+      setRows(
+        data.map((item: object, index: number) => ({
+          ...item,
+          rowID: index + 1,
+        }))
+      );  
+    });}
   };
 
-  const search = () => {
+  useEffect(() => {
+    loadData();
+  }, [query]);
+
+  const filterRows = useMemo(() => {
     if (searchText === "") {
-      if (category === "size-types") {
-        if (additionalVar1) {
-          const filteredRows = rowsOLD.filter(
-            (data) => data.operationCode === additionalVar1
-          );
-          setRows(
-            filteredRows.map((item: object, index: number) => ({
-              ...item,
-              rowID: index + 1,
-            }))
-          );
-        } else setRows([]);
-      } else setRows(rowsOLD);
+      return rows;
     } else {
-      let filteredRows1 = [];
-      if (category === "containers") {
-        if (additionalVar1) {
-          filteredRows1 = rowsOLD.filter(
-            (data) => data.operationCode === additionalVar1
-          );
-        }
-      } else {
-        filteredRows1 = rowsOLD;
-      }
-      const filteredRows = filteredRows1.filter((row) => {
+      const filteredRows = rows.filter((row) => {
         for (const x in columns) {
           if (columns[x].optlist != undefined) {
             if (
@@ -124,19 +104,12 @@ export default function DataList({
           }
         }
       });
-      setRows(
+      return (
         filteredRows.map((item, index) => ({ ...item, rowID: index + 1 }))
       );
     }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, [additionalVar1]);
-
-  useEffect(() => {
-    search();
-  }, [searchText]);
+  },
+  [rows, searchText])
 
   const handleAddRow = (number_rows: number) => {
     addRow(
@@ -171,6 +144,7 @@ export default function DataList({
   };
 
   const handleDelete = () => {
+    console.log(selectRows)
     const newRows = rows.filter((item) => item._id.includes("New"))
     if (newRows.length+selectRows.size==0) {
       messageApi.info('Vui lòng chọn dòng cần xóa!')
@@ -271,7 +245,7 @@ export default function DataList({
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
-      const data = e.target.result;
+      const data = new Uint8Array(e.target?.result as ArrayBuffer);
       const workbook = XLSX.read(data);
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
@@ -341,7 +315,6 @@ export default function DataList({
       columns,
       updatedRows,
       changes,
-      rows,
       rowsOLD,
       changeRows,
       setRows as (row: object[]) => void
@@ -353,9 +326,9 @@ export default function DataList({
   }, []);
 
   const sortedRows = useMemo(() => {
-    if (sortColumns.length === 0) return rows;
+    if (sortColumns.length === 0) return filterRows;
     const { columnKey, direction } = sortColumns[0];
-    let sortedRows = [...rows];
+    let sortedRows = [...filterRows];
     switch (columns.find((x) => x.key == columnKey)?.type) {
       case "boolean":
       case "number":
@@ -371,11 +344,8 @@ export default function DataList({
         const ss = columns.find((x) => x.key == columnKey)?.optlist;
         if (ss) {
           sortedRows = sortedRows.sort((a, b) =>
-            (
-              ss.find((x) => x.value == a[columnKey])?.label || ""
-            ).localeCompare(
-              ss.find((x) => x.value == b[columnKey])?.label || ""
-            )
+            (ss.find((x) => x.value == a[columnKey])?.label || "")
+            .localeCompare(ss.find((x) => x.value == b[columnKey])?.label || "")
           );
         }
         break;
@@ -386,12 +356,22 @@ export default function DataList({
         );
     }
     return direction === "DESC" ? sortedRows.reverse() : sortedRows;
-  }, [rows, sortColumns]);
+  }, [filterRows, sortColumns, columns]);
 
+  const handleEditModalRow = (row) => {
+    setEditForm(row);
+    setIsEditModalOpen(true);
+  };
+
+  // Hàm đóng modal
+  const handleCloseEditModal = () => {
+    setEditForm(null);
+    setIsEditModalOpen(false);
+  };
+  
   const ButtonZone = (buttonList: string[]) => (
     <Space
-      style={{ marginBottom: 16 }}
-      size={1}
+        size={1}
       split={<Divider type="vertical" />}
     >
       {buttonList.includes("add") ? (
@@ -458,12 +438,12 @@ export default function DataList({
   );
 
   return (
-    <div style={{ padding: 24, background: "#fff", minHeight: 500 }}>
+    <div style={{ padding: 24, background: "#fff", height: "100%" }}>
       {contextHolder}
-      <Row>
+      <Row style={{ marginBottom: 16 }}>
         <Col span={8}>
           <Input
-            style={{ width: "300px" }}
+            style={{ width: "300px"}}
             prefix={<SearchOutlined />}
             placeholder="Tìm kiếm"
             value={searchText}
@@ -477,7 +457,7 @@ export default function DataList({
       <DataGrid
         className="hearder-bg"
         style={{ width: "100%" }}
-        columns={adjustColumns(columns)}
+        columns={adjustColumns(columns, tableMode, handleEditModalRow)}
         rows={sortedRows}
         rowKeyGetter={(row) => row._id}
         sortColumns={sortColumns}
@@ -489,9 +469,28 @@ export default function DataList({
           resizable: true,
           sortable: true,
         }}
+        onCellClick={(a,e)=>{
+          if (tableMode!=null&&tableMode!="multiselect"){
+            e.preventDefault()
+            if (tableMode=="choose"){
+              selectRows.clear()
+              selectRows.add(a.row._id)
+            }
+          }
+          else if (tableMode=="multiselect"){
+            if (resultList?.has(a.row)) resultList?.delete(a.row); 
+            else resultList?.add(a.row)
+          }
+        }}
+        onCellDoubleClick={(a,e)=>{
+          if (tableMode!=null){
+            e.preventDefault()
+            if (tableMode=="choose") setResult(a.row)
+          }
+        }}
         renderers={NoData(rowsOLD)}
       />
-      <p>Số dòng: {rows.length}</p>
+      <p>Số dòng: {filterRows.length}</p>
       <Confirm
         type={dialog}
         onConfirm={okButton}
@@ -501,6 +500,18 @@ export default function DataList({
         open={addRowDialog}
         onConfirm={handleAddRow}
         onCancel={() => setAddRowDialog(false)}
+      />
+      <BookingEditForm
+        open={isEditModalOpen}
+        row={editFormRow}
+        onClose={handleCloseEditModal}
+        onSave={(updatedRow: any) => {
+          // Cập nhật dữ liệu dòng
+          const updatedRows = rows.map((r) =>
+            r._id === updatedRow._id ? updatedRow : r
+          );
+          setRows(updatedRows);
+        }}
       />
     </div>
   );

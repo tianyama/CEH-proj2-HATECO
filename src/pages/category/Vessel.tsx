@@ -6,10 +6,10 @@ export default function Vessel () {
   return (
     <div style={{padding: 10}}>
       <Helmet>
-        <title>Hateco - Danh mục ngôn ngữ</title>
+        <title>Hateco - Danh mục tàu</title>
       </Helmet>
       <DataList
-        category="ports"
+        category="vessels"
         columns={columns}
         buttonList={["add", "delete", "save", "template", "upload", "download"]}
       />

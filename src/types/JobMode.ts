@@ -31,11 +31,3 @@ export const columns: AdjustColumn[] = [
     optlist: extraModeList,
   },
 ];
-
-/* export const newRowJobMode = (rows: object[], i: number) => {
-  return { 
-    '_id': 'New' + (rows.length + i + 1).toString(), 
-    'rowID': rows.length + i + 1,
-    ...columns.reduce((acc, col) => ({ ...acc, [col.key]: col.value }), {})
-  };
-}; */

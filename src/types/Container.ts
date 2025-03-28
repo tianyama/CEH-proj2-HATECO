@@ -4,25 +4,48 @@ import { loadDataSelect } from "../lib/loading";
 
 export default interface Container {
   _id: string;
-  rowID: number;
-  operationCode: string;
-  localSizetype: string;
-  isoSizetype: string;
-  cargoTypeCode: string;
-  emptyCargoTypeCode: string;
+  containerNo: string;
+  vesselKey	: string;
+  classCode	: string;
+  operationCode	: string;
+  fe: string;
+  containerStatusCode	: string;
+  cargoTypeCode	: string;
+  commodity	: string;
+  localSizetype	: string;
+  isoSizetype	: string;
+  isLocalForeign: string;
+  jobModeCodeIn	: string;
+  methodCodeIn: string;
+  dateIn: Date;
+  dateOut: Date;
+  jobModeCodeOut: string;
+  methodCodeOut: string;
+  block: string;
+  bay: string;
+  row: string;
+  tier: string;
+  vgm: boolean;
+  mcWeight: number;
+  pol: string;
+  pod: string;
+  cusHold: boolean;
+  terHold: boolean;
+  isReturnBack: boolean;
+  isSpecialWarning: boolean;
+  isTruckBarge: string
 }
 
 export const companyList: SelectArrType[] = await loadDataSelect("operations");
 
 export const columns: AdjustColumn[] = [
+  { key: "containerNo", name: "Số container", type: "string" },
+  { key: "vesselKey", name: "Mã tàu", type: "string" },
   {
     key: "operationCode",
     name: "Hãng khai thác",
-    type: "select",
+    type: "string",
     optlist: companyList,
   },
   { key: "localSizetype", name: "Kích cỡ nội bộ", type: "string" },
-  { key: "isoSizetype", name: "Kích cỡ ISO", type: "string" },
-  { key: "cargoTypeCode", name: "Loại hàng", type: "string" },
-  { key: "emptyCargoTypeCode", name: "Loại hàng rỗng", type: "string" },
 ];

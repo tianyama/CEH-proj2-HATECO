@@ -7,6 +7,8 @@ import {
   DateEditCell,
 } from "./CellsComponents";
 import { SelectArrType } from "../../lib/arrList";
+import { CloseOutlined, EditTwoTone } from "@ant-design/icons";
+import { Button } from "antd";
 
 export interface AdjustColumn extends Column<any> {
   type: string;
@@ -20,14 +22,37 @@ export const RowIDColumn: Column<any> = {
   width: "50px",
   headerCellClass: "rtd-header-text",
   cellClass: "rtd-text",
-  sortable: false,
 };
 
-const adjustColumn = (column: AdjustColumn): Column<any> => {
+export const EditButtonColumn: (func: (x: any)=>void)=>Column<any> = (takeEditRow) =>
+({
+  key: "editButton",
+  name: "Điều chỉnh",
+  width: "100px",
+  headerCellClass: "rtd-header-text",
+  cellClass: "rtd-text",
+  renderCell: (params) => (
+    <>
+      <Button
+        size="small"
+        color="primary"
+        variant="outlined"
+        onClick={() => takeEditRow(params.row)}
+      >
+        <EditTwoTone />
+      </Button>
+      <Button size="small" color="danger" variant="outlined">
+        <CloseOutlined />
+      </Button>
+    </>
+  ),
+})
+
+const adjustColumn = (column: AdjustColumn, mode?: string): Column<any> => {
   const baseColumn: Column<any> = {
     key: column.key,
     name: column.name,
-    editable: column.editable,
+    editable: (mode!=null) ? false : column.editable,
     width: column.width,
     headerCellClass: "rtd-header-text",
     cellClass: ["boolean", "date"].includes(column.type)
@@ -62,6 +87,12 @@ const adjustColumn = (column: AdjustColumn): Column<any> => {
   return baseColumn;
 };
 
-export const adjustColumns: (columns: AdjustColumn[]) => Column<any>[] = (
-  columns
-) => [SelectColumn, RowIDColumn, ...columns.map((item) => adjustColumn(item))];
+export const adjustColumns: (
+  columns: AdjustColumn[],
+  mode?: string,
+  takeEditRow?: any
+) => Column<any>[] = (columns, mode?, takeEditRow?) =>
+    mode == "editform" ? [EditButtonColumn(takeEditRow), ...columns.map((item) => adjustColumn(item, mode))]
+  : mode == "choose" ? [RowIDColumn, ...columns.map((item) => adjustColumn(item, mode))]
+  : mode == "multiselect" ? [SelectColumn, RowIDColumn, ...columns.map((item) => adjustColumn(item, mode))]
+  : [SelectColumn, RowIDColumn, ...columns.map((item) => adjustColumn(item))];

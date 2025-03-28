@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 import { AdjustColumn } from '../component/ui/column';
 import { SelectArrType } from './arrList';
 
-export const exportRawExcel = (columns: AdjustColumn<any>[], filename: string) => {
+export const exportRawExcel = (columns: AdjustColumn[], filename: string) => {
   const headers = columns.filter(column => column.key!='rdg-select-column').map(col => col.name);
   const worksheet = XLSX.utils.aoa_to_sheet([headers]);
   const workbook = XLSX.utils.book_new();
@@ -10,13 +10,17 @@ export const exportRawExcel = (columns: AdjustColumn<any>[], filename: string) =
   XLSX.writeFile(workbook, filename);
 };
 
-export const exportToExcel = (columns: AdjustColumn<any>[], rows: any[], filename: string) => {
+export const exportToExcel = (columns: AdjustColumn[], rows: Record<string, unknown>[], filename: string) => {
   console.log(columns)
   const worksheetData = rows.map(row => {
-    const newRow: any = {};
+    const newRow: Record<string, unknown> = {};
     columns.filter(column => column.key!='rdg-select-column').forEach(col => {
       if (col.type == 'select') 
-        newRow[col.name as keyof typeof newRow] = col.optlist.find((option: SelectArrType) => option.value === row[col.key])?.label;
+        newRow[col.name as keyof typeof newRow] = col.optlist?.find((option: SelectArrType) => option.value === row[col.key])?.label;
+      else if (col.type == 'date') 
+        newRow[col.name as keyof typeof newRow] = new Date(row[col.key] as string);
+      else if (col.type == 'boolean')
+        newRow[col.name as keyof typeof newRow] = row[col.key]?"X":"";
       else newRow[col.name as keyof typeof newRow] = row[col.key];
     });
     return newRow;
@@ -27,7 +31,7 @@ export const exportToExcel = (columns: AdjustColumn<any>[], rows: any[], filenam
   XLSX.writeFile(workbook, filename);
 };
 
-export const importFromExcel = (columns: Column<any>[], rows: object[], file: File, 
+/* export const importFromExcel = (columns: Column<any>[], rows: object[], file: File, 
                                 setRows: (row: object[]) => void, setFile: (file: File | null) => void) => {
   if (!file) return;
   const reader = new FileReader();
@@ -65,4 +69,4 @@ export const importFromExcel = (columns: Column<any>[], rows: object[], file: Fi
   };
   reader.readAsArrayBuffer(file);
   setFile(null);
-};
+}; */

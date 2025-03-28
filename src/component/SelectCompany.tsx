@@ -1,18 +1,17 @@
-import { useEffect, useState } from "react";
-import { companyList2, SelectArrType } from "../lib/arrList";
+import { useState } from "react";
+import { SelectArrType } from "../lib/arrList";
 import { Button, Form, Modal, Select } from "antd";
 import { SyncOutlined } from "@ant-design/icons";
-import { loadDataSelect } from "../lib/loading";
 
 interface SelectCompanyProps {
   companyList: SelectArrType[];
   onCompanyChange: (company: string) => void;
 }
 
-const SelectCompany = ({
+export default function SelectCompany ({
   companyList,
   onCompanyChange,
-}: SelectCompanyProps) => {
+}: Readonly<SelectCompanyProps>) {
   const [company, setCompany] = useState("");
   const [alertCompany, setAlertCompany] = useState(false);
 
@@ -20,13 +19,12 @@ const SelectCompany = ({
     onCompanyChange(company);
     if (!company) setAlertCompany(true);
   };
-
   return (
     <div
       style={{
         padding: 24,
         background: "#fff",
-        minHeight: 500,
+        height: 495,
         justifyContent: "center",
       }}
     >
@@ -61,5 +59,3 @@ const SelectCompany = ({
     </div>
   );
 };
-
-export default SelectCompany;

@@ -1,20 +1,11 @@
 import { AdjustColumn } from "../component/ui/column";
-import { batchAddItem, batchUpdateItem } from "./api";
-import {
-  RenderCellProps,
-  RenderEditCellProps,
-  RowsChangeData,
-} from "react-data-grid";
+import { RowsChangeData } from "react-data-grid";
 
 export const newRow = (columns: AdjustColumn[], rows: object[], i: number) => ({
   _id: "New" + (rows.length + i + 1).toString(),
   rowID: rows.length + i + 1,
   ...columns.reduce((acc, col) => ({ ...acc, [col.key]: col.value }), {}),
 });
-
-export const paramData = (
-  params: RenderEditCellProps<any> | RenderCellProps<any>
-) => params.row[params.column.key];
 
 export const addRow = (
   columns: AdjustColumn[],
@@ -50,35 +41,21 @@ const unChangedRow = (
   }
 };
 
-export const changeValue = (
-  value: string | number | boolean | Date | null,
-  params: RenderEditCellProps<any> | RenderCellProps<any>,
-  columns: AdjustColumn[],
-  changeRows: Set<string>,
-  rowsOLD: any[]
-) => {
-  params.row[params.column.key] = value;
-  unChangedRow(rowsOLD, params.row, changeRows, columns);
-};
-
 export const editRow = (
   columns: AdjustColumn[],
   updatedRows: any[],
   changes: RowsChangeData<any>,
-  rows: any[],
   rowsOLD: any[],
   changeRows: Set<string>,
   setRows: (row: object[]) => void
 ) => {
-  const newData = [...rows];
+  setRows(updatedRows);
   changes.indexes.forEach((index) => {
-    newData[index] = updatedRows[index];
     unChangedRow(rowsOLD, updatedRows[index], changeRows, columns);
   });
-  setRows(newData);
 };
 
-export const updateTable = async (
+/* export const updateTable = async (
   category: string,
   rows: any[],
   changeRows: Set<string>
@@ -98,3 +75,4 @@ export const updateTable = async (
     });
   await batchUpdateItem(category, updateData);
 };
+ */
