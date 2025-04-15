@@ -1,8 +1,7 @@
 import { AdjustColumn } from "../component/ui/column";
-import { SelectArrType } from "../lib/arrList";
-import { loadDataSelect } from "../lib/loading";
+import RowTypes from "./RowTypes";
 
-export default interface Vessel {
+export default interface VesselTYPE extends RowTypes{
   vesselCode: string,
   vesselName: string,
   operationCode: string,
@@ -10,12 +9,10 @@ export default interface Vessel {
   imo: string
 }
 
-export const companyList: SelectArrType[] = await loadDataSelect("operations");
-
 export const columns: AdjustColumn[] = [
-  { key: "vesselCode", name: "Mã tàu", type: "string" },
+  { key: "vesselCode", name: "Mã tàu", type: "string", primary: true },
   { key: "vesselName", name: "Tên tàu", type: "string" },
-  { key: "operationCode", name: "Hãng khai thác", type: "select", optlist: companyList },
+  { key: "operationCode", name: "Hãng khai thác", type: "select"},
   { key: "callSign", name: "Callsign", type: "string" },
   { key: "imo", name: "IMO", type: "string" },
 ];

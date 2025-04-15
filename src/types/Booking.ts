@@ -1,8 +1,7 @@
 import { AdjustColumn } from "../component/ui/column";
-import { bookingStatusList, bookingTypeList, SelectArrType } from "../lib/arrList";
-import { loadDataSelect } from "../lib/loading";
+import { bookingStatusList, bookingTypeList } from "../lib/arrList";
 
-export default interface Booking {
+export default interface BookingTYPE {
   _id: string;
   rowID: number;
   bookingStatus: number;
@@ -11,8 +10,8 @@ export default interface Booking {
   bookingDate: Date;
   expDate: Date;
   operationCode: string;
-  localSizeType: string;
-  isoSizeType: string;
+  localSizetype: string;
+  isoSizetype: string;
   bookingAmount: number;
   stackingAmount: number;
   shipperName:  string;
@@ -40,15 +39,13 @@ export default interface Booking {
   co2: string;
 }
 
-const companyList: SelectArrType[] = await loadDataSelect("operations");
-
 export const columns: AdjustColumn[] = [
   { key: "bookingStatus", name: "Trạng thái", width: "15%", type: "select", optlist: bookingStatusList },
   { key: "bookingType", name: "Loại Booking", width: "15%", type: "select", optlist: bookingTypeList },
-  { key: "bookingNo", name: "Số booking", width: "15%", type: "string" },
+  { key: "bookingNo", name: "Số booking", width: "15%", type: "string", primary: true },
   { key: "bookingDate", name: "Ngày đăng ký", width: "15%", type: "date" },
   { key: "expDate", name: "Ngày hết hạn", width: "15%", type: "date" },
-  { key: "operationCode", name: "Hãng KT", width: "15%", type: "select", optlist: companyList},
+  { key: "operationCode", name: "Hãng KT", width: "15%", type: "select", optlist: undefined},
   { key: "localSizetype", name: "Kích cỡ", width: "15%", type: "string" },
   { key: "isoSizetype", name: "Kích cỡ ISO", type: "string" },
   { key: "bookingAmount", name: "Số lượng", type: "number" },

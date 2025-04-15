@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Input, InputNumber, Modal } from "antd";
+import { Input, Modal } from "antd";
 
 interface ConfirmProps {
   onConfirm: () => void;

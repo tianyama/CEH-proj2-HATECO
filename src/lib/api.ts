@@ -1,4 +1,5 @@
 import axios from "axios";
+import RowTypes from "../types/RowTypes";
 
 const API_URL = "https://be-size-container-api.onrender.com";
 
@@ -6,7 +7,9 @@ const BATCH_SIZE: number = 3;
 
 export const fetchData = async (category: string, query?: string) => {
   try {
-    const response = await axios.get(`${API_URL}/${category}?limit=null${query??""}`);
+    const response = await axios.get(
+      `${API_URL}/${category}?limit=null${query ?? ""}`
+    );
     return response.data.data.results;
   } catch (error) {
     console.error("Lỗi lấy dữ liệu:", error);
@@ -14,9 +17,23 @@ export const fetchData = async (category: string, query?: string) => {
   }
 };
 
+export const getItem = async (category: string, id: string) => {
+  try {
+    const response = await axios.get(`${API_URL}/${category}/${id}`);
+    return response;
+  } catch (error) {
+    console.error("Lỗi lấy dữ liệu:", error);
+    return [];
+  }
+};
+
 export const addItem = async (category: string, data: object) => {
-  const res = await axios.post(`${API_URL}/${category}`, data)
+  const res = await axios.post(`${API_URL}/${category}`, data);
   return res.data;
+};
+
+export const cancelItem = async (category: string, id: string) => {
+  await axios.post(`${API_URL}/${category}/${id}`);
 };
 
 export const updateItem = async (
@@ -24,7 +41,7 @@ export const updateItem = async (
   id: string,
   data: object
 ) => {
-  const req = await axios.put(`${API_URL}/${category}/${id}`, data)
+  const req = await axios.put(`${API_URL}/${category}/${id}`, data);
   return req.data;
 };
 
@@ -40,62 +57,55 @@ const spiltArray = (array: any[]) => {
   return chunks;
 };
 
-export const batchAddItem = async (
-  category: string,
-  data: { rowID: number; data: object }[]
-) => {
-  const errors: { rowID: number, data: object, error: unknown }[] = [];
+export const batchAddItem = async (category: string, data: RowTypes[]) => {
+  const errors: { rowID: number; error: unknown }[] = [];
   const successes: { rowID: number; data: object }[] = [];
   for (const i of spiltArray(data)) {
-    const promises = i.map(async (item) => {
+    const promises = i.map(async ({ _id, rowID, ...Rdata }) => {
       try {
-        const data = await addItem(category, item.data);
-        successes.push({ rowID: item.rowID, data }); // Lưu request thành công
+        const data = await addItem(category, Rdata);
+        successes.push({ rowID, data }); // Lưu request thành công
       } catch (error) {
-        errors.push({ rowID: item.rowID, data, error }); // Lưu request lỗi
+        errors.push({ rowID, error }); // Lưu request lỗi
       }
-    })
+    });
     await Promise.allSettled(promises);
-  };
-  return ({ successes, errors });
+  }
+  console.log({ successes, errors });
+  return { successes, errors };
 };
 
-export const batchUpdateItem = async (
-  category: string,
-  data: { id: string; rowID: number; data: object }[]
-) => {
-  const errors: { rowID: number, data: object, error: unknown }[] = [];
+export const batchUpdateItem = async (category: string, data: RowTypes[]) => {
+  console.log(data);
+  const errors: { rowID: number; error: unknown }[] = [];
   const successes: { rowID: number; data: object }[] = [];
   for (const i of spiltArray(data)) {
-    const promises = i.map(async (item) => {
+    const promises = i.map(async ({ _id, rowID, ...Rdata }) => {
       try {
-        const data = await updateItem(category, item.id, item.data);
-        successes.push({ rowID: item.rowID, data }); // Lưu request thành công
+        const data = await updateItem(category, _id, Rdata);
+        successes.push({ rowID, data }); // Lưu request thành công
       } catch (error) {
-        errors.push({ rowID: item.rowID, data, error }); // Lưu request lỗi
+        errors.push({ rowID, error }); // Lưu request lỗi
       }
-    })
+    });
     await Promise.allSettled(promises);
-  };
-  return ({ successes, errors });
+  }
+  return { successes, errors };
 };
 
-export const batchDeleteItem = async (
-  category: string,
-  list: { id: string; rowID: number }[]
-) => {
+export const batchDeleteItem = async (category: string, list: RowTypes[]) => {
   const errors: { rowID: number; error: unknown }[] = [];
   const successes: { rowID: number }[] = [];
   for (const i of spiltArray(list)) {
-    const promises = i.map(async (item) => {
+    const promises = i.map(async ({ _id, rowID }) => {
       try {
-        await deleteItem(category, item.id);
-        successes.push({ rowID: item.rowID }); // Lưu request thành công
+        await deleteItem(category, _id);
+        successes.push({ rowID }); // Lưu request thành công
       } catch (error) {
-        errors.push({ rowID: item.rowID, error }); // Lưu request lỗi
+        errors.push({ rowID, error }); // Lưu request lỗi
       }
-    })
+    });
     await Promise.allSettled(promises);
-  };
+  }
   return { successes, errors };
 };

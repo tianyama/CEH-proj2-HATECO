@@ -10,6 +10,7 @@ import ManageBooking from "../pages/shipping-line/ManageBooking";
 import Operation from "../pages/category/Operation";
 import JobMode from "../pages/category/JobMode";
 import IMO from "../pages/category/IMO";
+import Commodity from "../pages/category/Commodity";
 
 export const ArrCategories = [
   {
@@ -77,7 +78,7 @@ export const ArrCategories = [
         name: "Danh mục cấu hình hàng hoá",
         icon: <PlusSquareOutlined />,
         link: "/category/commodity",
-        page: undefined,
+        page: <Commodity />,
       },
       {
         name: "Danh mục quốc gia",

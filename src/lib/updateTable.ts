@@ -1,78 +1,117 @@
 import { AdjustColumn } from "../component/ui/column";
 import { RowsChangeData } from "react-data-grid";
+import type RowTypes from "../types/RowTypes";
+import {
+  batchAddItem,
+  batchDeleteItem,
+  batchUpdateItem,
+  updateItem,
+} from "../lib/api";
+import { MessageInstance } from "antd/es/message/interface";
+import { checkSame, findRow } from "./function";
 
-export const newRow = (columns: AdjustColumn[], rows: object[], i: number) => ({
-  _id: "New" + (rows.length + i + 1).toString(),
-  rowID: rows.length + i + 1,
-  ...columns.reduce((acc, col) => ({ ...acc, [col.key]: col.value }), {}),
-});
-
-export const addRow = (
+export function addRow<T extends RowTypes>(
   columns: AdjustColumn[],
   number_rows: number,
-  rows: object[],
-  newRow: (columns: AdjustColumn[], rows: object[], i: number) => object,
-  setRows: (row: object[]) => void,
+  rows: T[],
+  setRows: (row: T[]) => void,
   setAddRowDialog: (dialog: boolean) => void
-) => {
+) {
   const newRows = [];
-  for (let i = 0; i < number_rows; i++) {
-    newRows.push(newRow(columns, rows, i));
+  for (const i of Array(number_rows).keys()) {
+    newRows.push({
+      _id: "New" + (rows.length + Number(i) + 1).toString(),
+      rowID: rows.length + Number(i) + 1,
+      ...columns.reduce(
+        (acc, { key, value }) => ({ ...acc, [key]: value }),
+        {}
+      ),
+    } as unknown as T);
   }
   setRows([...rows, ...newRows]);
   setAddRowDialog(false);
-};
+}
 
-const unChangedRow = (
-  rowsOLD: any[],
-  rowNEW: any,
-  changeRows: Set<string>,
-  columns: AdjustColumn[]
-) => {
-  const rowOLD = rowsOLD.find((i) => i._id == rowNEW._id);
-  if (rowOLD) {
-    for (const x in columns) {
-      if (rowNEW[columns[x].key] != rowOLD[columns[x].key]) {
-        changeRows.add(rowNEW._id);
-        return;
-      }
-    }
-    changeRows.delete(rowNEW._id);
-  }
-};
-
-export const editRow = (
+export function editRow<T extends RowTypes>(
   columns: AdjustColumn[],
-  updatedRows: any[],
-  changes: RowsChangeData<any>,
-  rowsOLD: any[],
-  changeRows: Set<string>,
-  setRows: (row: object[]) => void
-) => {
-  setRows(updatedRows);
-  changes.indexes.forEach((index) => {
-    unChangedRow(rowsOLD, updatedRows[index], changeRows, columns);
+  updatedRows: T[],
+  rows: T[],
+  { column, indexes }: RowsChangeData<T>,
+  messageApi: MessageInstance
+) {
+  const primaryCols = columns.filter(({ primary }) => primary);
+  const editRows = indexes.map((i) => {
+    const rowNEW = updatedRows[i];
+    if (
+      primaryCols.some(({ key }) => key === column.key) &&
+      rows.some((row) => checkSame(primaryCols, rowNEW, row))
+    ) {
+      messageApi.error("Dữ liệu đã tồn tại trong bảng");
+      return rows;
+    }
+    rowNEW.isEdit = true;
+    const { rowID, ...res } = rowNEW;
+    return res;
   });
-};
+  return rows.map((row) => ({ ...row, ...findRow(editRows, row._id) }));
+}
 
-/* export const updateTable = async (
+export async function deleteRow<T extends RowTypes>(
   category: string,
-  rows: any[],
-  changeRows: Set<string>
-) => {
-  const addData = rows
-    .filter((item) => item._id.includes("New"))
-    .map((row) => {
-      const { _id, ...rowData } = row;
-      return { id: _id, data: rowData };
-    });
-  await batchAddItem(category, addData);
-  const updateData = rows
-    .filter((item) => changeRows.has(item._id))
-    .map((row) => {
-      const { _id, ...rowData } = row;
-      return { id: _id, data: rowData };
-    });
-  await batchUpdateItem(category, updateData);
-};
- */
+  rows: T[],
+  selectRows: Set<string>
+) {
+  const rowlist = [...selectRows];
+  const resNewRows = rows.filter(
+    ({ _id }) => !rowlist.includes(_id) && _id.includes("New")
+  );
+  const deleteRows = rows.filter(
+    ({ _id }) => rowlist.includes(_id) && !_id.includes("New")
+  );
+  const deleteRes = await batchDeleteItem(category, deleteRows);
+  const errDelete = deleteRes.errors.length
+    ? "Không thể xóa các dòng: " +
+      deleteRes.errors.map((x) => x.rowID).join(", ")
+    : 0;
+  return { errDelete, resNewRows };
+}
+
+export async function updateData<T extends RowTypes>(
+  category: string,
+  newRows: T[],
+  updateRows: T[]
+) {
+  const addRes = await batchAddItem(category, newRows);
+  const updateRes = await batchUpdateItem(category, updateRows);
+  const res = [];
+  const errAdd = addRes.errors.length
+    ? "Không thể thêm các dòng: " + addRes.errors.map((x) => x.rowID).join(", ")
+    : undefined;
+  const errUpdate = updateRes.errors.length
+    ? "Không thể cập nhật các dòng: " +
+      updateRes.errors.map(({rowID}) => rowID).join(", ")
+    : undefined;
+  if (errAdd) res.push(errAdd);
+  if (errUpdate) res.push(errUpdate);
+  return res;
+}
+
+export async function updateForm<T extends RowTypes>(
+  updatedRow: T,
+  category: string,
+  rows: T[],
+  setRows: (x: T[]) => void,
+  messageApi: MessageInstance
+) {
+  const temp = rows.map((item) =>
+    item._id == updatedRow._id ? updatedRow : item
+  );
+  const { _id, rowID, ...rowData } = updatedRow;
+  try {
+    await updateItem(category, _id, rowData);
+    messageApi.success("Đã cập nhật!");
+    setRows(temp);
+  } catch (error) {
+    messageApi.error("Có lỗi xảy ra khi cập nhật dữ liệu");
+  }
+}

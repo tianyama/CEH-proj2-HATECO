@@ -1,8 +1,7 @@
 import { AdjustColumn } from "../component/ui/column";
+import RowTypes from "./RowTypes";
 
-export default interface IMO {
-  _id: string;
-  rowID: number;
+export default interface IMOTYPE extends RowTypes {
   imdgClass: string;
   un: string;
   placard: string;

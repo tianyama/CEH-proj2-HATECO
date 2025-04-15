@@ -1,34 +1,29 @@
 import { useEffect, useState } from "react";
-import SelectCompany from "../../component/SelectCompany";
 import { Col, Row } from "antd";
 import DataList from "../../component/DataList";
-import ContainerSizeTYPE, { columns } from "../../types/ContainerSize";
+import CommodityTYPE, { columns } from "../../types/Commodity";
+import JobModeTYPE, { JobModeCol_Commodity } from "../../types/JobMode";
 import { Helmet } from "react-helmet";
-import { SelectArrType } from "../../lib/arrList";
-import { loadDataSelect } from "../../lib/loading";
 import loadData from "../../lib/LoadTable";
 
-const category = "size-types";
+const category = "commodities";
+const category2 = "job-modes";
 
 export default function ContainerSize() {
-  const [selectedCompany, setSelectedCompany] = useState("");
-  const [companyList, setCompanyList] = useState<SelectArrType[]>([]);
   const [rows, setRows] = useState([]);
+  const [jobModeRows, setJobModeRows] = useState([]);
   const [updateStatus, setUpdateStatus] = useState(false);
+  const [updateStatus2, setUpdateStatus2] = useState(false)
 
   useEffect(() => {
-    const loadCompanyList = async () => {
-      setCompanyList(await loadDataSelect("operations"));
-      columns[0].optlist = await loadDataSelect("operations");
-    };
-    loadCompanyList();
-  }, []);
-
-  useEffect(() => {
-    const query = selectedCompany ? "&operationCode=" + selectedCompany : undefined;
-    loadData(category, columns, setRows, query);
+    loadData(category, columns, setRows);
     setUpdateStatus(false);
-  }, [updateStatus, selectedCompany]);
+  }, [updateStatus]);
+
+  useEffect(() => {
+    loadData(category2, JobModeCol_Commodity, setJobModeRows);
+    setUpdateStatus(false);
+  }, [updateStatus2]);
 
   return (
     <div style={{ padding: 10, height: "100%" }}>
@@ -43,14 +38,21 @@ export default function ContainerSize() {
           height: "100%",
         }}
       >
-        <Col span={24} md={6}>
-          <SelectCompany
-            companyList={companyList}
-            onCompanyChange={setSelectedCompany}
+        <Col span={24} md={7}>
+          <DataList<JobModeTYPE>
+            tableMode="choose"
+            category={category2}
+            columns={JobModeCol_Commodity}
+            exRows={jobModeRows}
+            setUpdateStatus={setUpdateStatus2}
+            updateStatus={updateStatus2}
+            buttonList={[
+              "save"
+            ]}
           />
         </Col>
-        <Col span={24} md={18}>
-          <DataList<ContainerSizeTYPE>
+        <Col span={24} md={17}>
+          <DataList<CommodityTYPE>
             tableMode="editrow"
             category={category}
             columns={columns}
@@ -65,7 +67,6 @@ export default function ContainerSize() {
               "upload",
               "download",
             ]}
-            query={selectedCompany ? "&operationCode=" + selectedCompany : ""}
           />
         </Col>
       </Row>

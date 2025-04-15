@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { bookingStatusList, SelectArrType } from "../lib/arrList";
-import { Button, Form, FormProps, message, Row, Segmented } from "antd";
+import { Button, Form, FormProps, message, Row, Segmented, Typography } from "antd";
 import { SyncOutlined } from "@ant-design/icons";
 import {
   CheckboxElement,
-  FormElement,
+  DateInputForm,
+  InputForm,
+  NumberForm,
+  SelectElement,
+  SelectTable,
 } from "./ui/InputFormElements";
 import dayjs from "dayjs";
 
@@ -17,41 +21,21 @@ import BookingSearch from "../types/BookingSearch";
 import Container from "../types/Container";
 import ContainerSize from "../types/ContainerSize";
 import Booking from "../types/Booking";
-import { loadDataSelect } from "../lib/loading";
-
-interface BookingFormProps {
-  segment: string;
-  setSegment: (value: string) => void;
-  getParam: (value: string) => void;
-  getNewRow: (value: any) => void;
-}
 
 interface BookingIOLoadProps {
   getParam: (value: string) => void;
 }
-
-interface BookingNewFormProps {
-  type: string;
-  getNewRow: (value: any) => void;
+interface BookingFormProps {
+  segment: string;
+  setSegment: (value: string) => void;
+  getParam: (value: string) => void;
 }
 
 const BookingIOLoad = ({ getParam }: BookingIOLoadProps) => {
   const [openTableSelect, setOpenTableSelect] = useState("");
   const [form] = Form.useForm();
-  if (!Form.useWatch("BL_fromDate", form))
-    form.setFieldValue("BL_fromDate", dayjs(new Date()));
-  if (!Form.useWatch("BL_toDate", form))
-    form.setFieldValue("BL_toDate", dayjs(new Date()));
-  const [companyList, setCompanyList] = useState<SelectArrType[]>([]);
-  const [portList, setPortList] = useState<SelectArrType[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      setCompanyList(await loadDataSelect("operations"));
-      setPortList(await loadDataSelect("ports"));
-    };
-    load();
-  }, []);
+  form.setFieldValue("BL_fromDate", dayjs(new Date()));
+  form.setFieldValue("BL_toDate", dayjs(new Date()));
   const handleShowTable = (category?: string) => {
     setOpenTableSelect(category ?? "");
   };
@@ -64,11 +48,11 @@ const BookingIOLoad = ({ getParam }: BookingIOLoadProps) => {
   const onFinish: FormProps<BookingSearch>["onFinish"] = (v) => {
     getParam(
       bkSearchFrm
-        .map(({name, attribute, type}) => {
-          const res = v[name as keyof BookingSearch];
+        .map((item) => {
+          const res = v[item.name as keyof BookingSearch];
           return res
-            ? `&${attribute}=${
-                type === "date" ? (res as Date).toISOString() : res
+            ? `&${item.attribute}=${
+                (item.type === "date") ? (res as Date).toISOString() : res
               }`
             : "";
         })
@@ -76,32 +60,57 @@ const BookingIOLoad = ({ getParam }: BookingIOLoadProps) => {
     );
   };
 
-  const chooseList = (category: string) => {
-    if (category == "BL_company") {
-      return companyList;
-    } else if (["BL_pod", "BL_pol", "BL_fpod"].includes(category)) {
-      return portList;
-    }
-  };
-
   return (
     <Form form={form} layout="vertical" onFinish={onFinish}>
       <Row gutter={[10, 0]}>
-        {bkSearchFrm.map(
-          ({type, name, label, width, required, disabled, optlist, optTable, col}) =>
-            <FormElement
-              name={name}
-              label={label}
-              optlist={chooseList(name) ?? optlist ?? []}
-              type={type}
-              width={width}
-              col={col}
-              required={required}
-              disabled={disabled}
-              handleCheck={() => handleShowTable(optTable)}
+        {bkSearchFrm.map((arr) =>
+          arr.type === "select" ? (
+            <SelectElement
+              name={arr.name}
+              label={arr.label}
+              optlist={arr.optlist ?? []}
+              width={arr.width}
+              required={arr.required}
             />
+          ) : arr.type === "string" ? (
+            <InputForm
+              name={arr.name}
+              label={arr.label}
+              width={arr.width}
+              required={arr.required}
+            />
+          ) : arr.type === "number" ? (
+            <NumberForm
+              name={arr.name}
+              label={arr.label}
+              width={arr.width}
+              required={arr.required}
+            />
+          ) : arr.type === "date" ? (
+            <DateInputForm
+              name={arr.name}
+              label={arr.label}
+              width={arr.width}
+              required={arr.required}
+            />
+          ) : arr.type === "seltable" ? (
+            <SelectTable
+              name={arr.name}
+              label={arr.label}
+              width={arr.width}
+              required={arr.required}
+              handleCheck={() => handleShowTable(arr.optTable)}
+              value={form.getFieldValue(arr.name)}
+            />
+          ) : undefined
         )}
       </Row>
+      <CheckboxElement
+        name="BL_bookingStatus"
+        label={<p style={{ textAlign: "center" }}>Trạng thái</p>}
+        optlist={bookingStatusList}
+        width={8}
+      />
       <Form.Item style={{ alignItems: "center", marginTop: 20 }}>
         <Button
           variant="outlined"
@@ -121,7 +130,7 @@ const BookingIOLoad = ({ getParam }: BookingIOLoadProps) => {
   );
 };
 
-const BookingNewForm = ({ type, getNewRow }: BookingNewFormProps) => {
+const BookingNewForm = ({ type }: { type: string }) => {
   const [openTableSelect, setOpenTableSelect] = useState("");
   const [form] = Form.useForm();
   const EL_bookingAmount = Form.useWatch("bookingAmount", form);
@@ -131,20 +140,10 @@ const BookingNewForm = ({ type, getNewRow }: BookingNewFormProps) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [vessel, setVessel] = useState<Vessel>();
   const [sizeList, setSizeList] = useState<SelectArrType[]>([]);
-  const [companyList, setCompanyList] = useState<SelectArrType[]>([]);
-  const [portList, setPortList] = useState<SelectArrType[]>([]);
-
-  useEffect(() => {
-    const load = async () => {
-      setCompanyList(await loadDataSelect("operations"));
-      setPortList(await loadDataSelect("ports"));
-    };
-    load();
-  }, []);
 
   useEffect(() => {
     form.resetFields(["containerNo", "pod", "pol"]);
-  }, [type, form]);
+  }, [type]);
 
   useEffect(() => {
     if (operationCode) {
@@ -166,7 +165,7 @@ const BookingNewForm = ({ type, getNewRow }: BookingNewFormProps) => {
       setSizeList([]);
     }
     form.resetFields(["isoSizetype", "containerNo"]); // Reset dữ liệu khi chọn hãng khai thác
-  }, [operationCode, form]);
+  }, [operationCode]);
 
   const handleShowTable = (category?: string) => {
     if (category == "ContainerTable") {
@@ -194,7 +193,7 @@ const BookingNewForm = ({ type, getNewRow }: BookingNewFormProps) => {
     const result = Array.from(value);
     form.setFieldValue(
       "containerNo",
-      result.map((i) => i.containerNo).toString()
+      result.map((item) => item.containerNo).toString()
     );
     setOpenTableSelect("");
   };
@@ -205,23 +204,19 @@ const BookingNewForm = ({ type, getNewRow }: BookingNewFormProps) => {
       bookingType: type == "Đóng hàng" ? 1 : 0,
       stackingAmount: 0,
       ...bkFormList.reduce(
-        (acc, { name }) => ({ ...acc, [name]: v[name as keyof Booking] }),
+        (acc, cur) => ({ ...acc, [cur.name]: v[cur.name as keyof Booking] }),
         {}
       ),
       localSizetype: sizeList.find((x) => x.value == v.isoSizetype)?.var1,
       vesselKey: vessel?.vesselCode,
     };
     console.log("newR", newR);
-    addItem("booking", newR).then((res) => getNewRow(res));
+    addItem("booking", newR);
   };
 
-  const chooseList = (category: string) => {
+  const chooseList = (category?: string) => {
     if (category == "isoSizetype") {
       return sizeList;
-    } else if (category == "operationCode") {
-      return companyList;
-    } else if (["pod", "pol", "fpod"].includes(category)) {
-      return portList;
     }
   };
 
@@ -229,19 +224,51 @@ const BookingNewForm = ({ type, getNewRow }: BookingNewFormProps) => {
     <Form form={form} layout="vertical" onFinish={onFinish}>
       {contextHolder}
       <Row gutter={[10, 0]}>
-        {bkFormList.map(
-          ({type, name, label, width, required, disabled, optlist, optTable, col}) =>
-            <FormElement
-              name={name}
-              label={label}
-              optlist={chooseList(name) ?? optlist ?? []}
-              type={type}
-              width={width}
-              col={col}
-              required={required}
-              disabled={disabled}
-              handleCheck={() => handleShowTable(optTable)}
+        {bkFormList.map((arr) =>
+          arr.type === "select" ? (
+            <SelectElement
+              name={arr.name}
+              label={arr.label}
+              optlist={chooseList(arr.name) ?? arr.optlist ?? []}
+              width={arr.width}
+              required={arr.required}
+              disabled={arr.disabled}
             />
+          ) : arr.type === "string" ? (
+            <InputForm
+              name={arr.name}
+              label={arr.label}
+              width={arr.width}
+              required={arr.required}
+              disabled={arr.disabled}
+            />
+          ) : arr.type === "number" ? (
+            <NumberForm
+              name={arr.name}
+              label={arr.label}
+              width={arr.width}
+              required={arr.required}
+              disabled={arr.disabled}
+            />
+          ) : arr.type === "date" ? (
+            <DateInputForm
+              name={arr.name}
+              label={arr.label}
+              width={arr.width}
+              required={arr.required}
+              disabled={arr.disabled}
+            />
+          ) : arr.type === "seltable" ? (
+            <SelectTable
+              name={arr.name}
+              label={arr.label}
+              width={arr.width}
+              required={arr.required}
+              disabled={arr.disabled}
+              handleCheck={() => handleShowTable(arr.optTable)}
+              value={form.getFieldValue(arr.name)}
+            />
+          ) : undefined
         )}
       </Row>
       <Form.Item style={{ alignItems: "center", marginTop: 20 }}>
@@ -276,7 +303,6 @@ export default function BookingForm({
   segment,
   setSegment,
   getParam,
-  getNewRow,
 }: Readonly<BookingFormProps>) {
   return (
     <div
@@ -298,7 +324,7 @@ export default function BookingForm({
       {segment == "Tra cứu" ? (
         <BookingIOLoad getParam={getParam} />
       ) : (
-        <BookingNewForm type={segment} getNewRow={getNewRow} />
+        <BookingNewForm type={segment} />
       )}
     </div>
   );

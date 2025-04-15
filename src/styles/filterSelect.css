@@ -1,0 +1,28 @@
+/* Ghi đè style của Ant Design cho Select với mode="tags" */
+.ant-select {
+  width: 100%; /* Đảm bảo ô input chiếm toàn bộ chiều rộng */
+  height: 32px; /* Cố định chiều cao */
+  overflow-x: scroll; /* Ẩn nội dung tràn */
+  white-space: nowrap; /* Đảm bảo các tags nằm trên một dòng */
+}
+
+.ant-select-selector {
+  display: inline-flex; /* Sử dụng flex để căn chỉnh các tags */
+  align-items: center; /* Căn giữa các tags theo chiều dọc */
+  overflow-x: scroll; /* Cho phép cuộn ngang nếu nội dung tràn */
+  white-space: nowrap; /* Đảm bảo các tags nằm trên một dòng */
+  height: 100%; /* Đảm bảo chiều cao khớp với .ant-select */
+}
+
+.ant-select-selection-overflow {
+  display: inline-flex; /* Đảm bảo các tags nằm trên một dòng */
+  white-space: nowrap; /* Không cho phép xuống dòng */
+  overflow-x: scroll; /* Cho phép cuộn ngang */
+  max-height: 100%; /* Đảm bảo chiều cao không vượt quá ô input */
+}
+
+.ant-tag {
+  max-width: 150px; /* Giới hạn chiều rộng của mỗi tag */
+  overflow: scroll; /* Ẩn nội dung tràn */
+  white-space: nowrap; /* Đảm bảo tag không bị xuống dòng */
+}

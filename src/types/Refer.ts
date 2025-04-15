@@ -1,9 +1,8 @@
-import { companyList2, roundingList, moneyCreditList } from "../lib/arrList";
+import { roundingList, moneyCreditList } from "../lib/arrList";
 import { AdjustColumn } from "../component/ui/column";
+import RowTypes from "./RowTypes";
 
-export interface Refer {
-  _id: string;
-  rowID: number;
+export interface ReferTYPE extends RowTypes {
   operationCode: string;
   applyDate: Date;
   expireDate: Date;
@@ -18,10 +17,9 @@ export const columns: AdjustColumn[] = [
     name: "Hãng khai thác",
     width: "18%",
     type: "select",
-    optlist: companyList2,
   },
-  { key: "applyDate", name: "Ngày hiệu lực", value: new Date(), type: "date" },
-  { key: "expireDate", name: "Ngày hết hạn", value: new Date(), type: "date" },
+  { key: "applyDate", name: "Ngày hiệu lực", value: new Date(), type: "date", width: "15%" },
+  { key: "expireDate", name: "Ngày hết hạn", value: new Date(), type: "date", width: "15%" },
   {
     key: "rounding",
     name: "Làm tròn giờ",
@@ -29,7 +27,7 @@ export const columns: AdjustColumn[] = [
     type: "select",
     optlist: roundingList,
   },
-  { key: "hourAdding", name: "Giờ cộng thêm", value: 0, type: "number" },
+  { key: "hourAdding", name: "Giờ cộng thêm", value: 0, type: "number", width: "15%" },
   {
     key: "moneyCredit",
     name: "Loại thanh toán",
@@ -38,11 +36,3 @@ export const columns: AdjustColumn[] = [
     optlist: moneyCreditList,
   },
 ];
-
-/* export const newRowRefer = (rows: object[], i: number) => {
-  return {
-    _id: "New" + (rows.length + i + 1).toString(),
-    rowID: rows.length + i + 1,
-    ...columns.reduce((acc, col) => ({ ...acc, [col.key]: col.value }), {})
-  };
-}; */

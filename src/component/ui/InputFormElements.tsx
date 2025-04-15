@@ -11,157 +11,97 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import { SelectArrType } from "../../lib/arrList";
+import React from "react";
 
 interface FormElementProps {
+  type: string;
   name: string;
-  label?: string;
+  label?: string | React.ReactNode;
   width?: number;
+  col?: number;
   value?: any;
   required?: boolean;
   disabled?: boolean;
+  optlist: SelectArrType[];
+  handleCheck: () => void;
 }
 
 const { Search } = Input;
 
-interface SelectElementProps extends FormElementProps {
-  optlist: SelectArrType[];
-}
-
-interface SelTableElementProps extends FormElementProps {
+interface SelTableElementProps {
+  value: any;
   handleCheck: () => void;
 }
 
-export const InputForm = ({
+const formProps = (
+  name: string,
+  label: string | React.ReactNode,
+  type?: string,
+  required?: boolean,
+  value?: any
+) => ({
   name,
   label,
-  required,
-  width,
-  disabled,
-}: FormElementProps) => (
-  <Col span={width ?? 12}>
-    <Form.Item
-      name={name}
-      label={label}
-      rules={[{ required: required, message: "Vui lòng nhập" }]}
-      style={{ marginBottom: 10 }}
-    >
-      <Input style={{ width: "100%" }} disabled={disabled} />
-    </Form.Item>
-  </Col>
+  style: { marginBottom: 10, width: "100%" },
+  rules: [{ required, message: "Vui lòng nhập " }],
+  initialValue: value,
+  getValueProps: (value) =>
+    type == "date" ? { value: value ? dayjs(value) : dayjs(Date()) } : value,
+});
+
+export const SelectTable = ({ handleCheck, value }: SelTableElementProps) => (
+  <Space.Compact style={{ width: "100%" }}>
+    <Search allowClear onSearch={handleCheck} readOnly value={value} />
+  </Space.Compact>
 );
 
-export const NumberForm = ({
+export const FormElement = ({
+  type,
   name,
   label,
-  required,
-  width,
-  disabled,
-}: FormElementProps) => (
-  <Col span={width ?? 12}>
-    <Form.Item
-      name={name}
-      label={label}
-      rules={[{ required: required, message: "Vui lòng nhập" }]}
-      style={{ marginBottom: 10 }}
-    >
-      <InputNumber min={0} style={{ width: "100%" }} disabled={disabled} />
-    </Form.Item>
-  </Col>
-);
-
-export const DateInputForm = ({
-  name,
-  label,
-  required,
-  width,
-  disabled,
-}: FormElementProps) => (
-  <Col span={width ?? 12}>
-    <Form.Item
-      name={name}
-      label={label}
-      getValueProps={(value) => ({
-        value: value ? dayjs(value) : dayjs(Date()),
-      })}
-      rules={[{ required: required, message: "Vui lòng nhập" }]}
-      style={{ marginBottom: 10 }}
-    >
-      <DatePicker
-        disabled={disabled}
-        title="Từ ngày"
-        style={{ width: "100%", textAlign: "center" }}
-        format={"YYYY-MM-DD HH:mm:ss"}
-        showTime={{ format: "HH:mm:ss" }}
-      />
-    </Form.Item>
-  </Col>
-);
-
-export const SelectElement = ({
-  name,
-  label,
-  required,
-  optlist,
-  width,
   value,
   disabled,
-}: SelectElementProps) => (
-  <Col span={width ?? 12}>
-    <Form.Item
-      name={name}
-      label={label}
-      initialValue={value}
-      rules={[{ required: required, message: "Vui lòng nhập" }]}
-      style={{ marginBottom: 10 }}
-    >
-      <Select
-        disabled={disabled}
-        style={{ width: "100%" }}
-        options={optlist}
-        showSearch
-        optionFilterProp="label"
-        allowClear
-      />
-    </Form.Item>
-  </Col>
-);
-
-export const CheckboxElement = ({
-  name,
-  label,
+  width,
+  col,
   optlist,
-  width,
-}: SelectElementProps) => (
-  <Form.Item name={name} label={label}>
-    <Checkbox.Group />
-    <Row gutter={[8, 12]}>
-      {optlist.map((i) => (
-        <Col key={i.value} span={width ?? 12}>
-          <Checkbox value={i.value}>{i.label}</Checkbox>
-        </Col>
-      ))}
-    </Row>
-  </Form.Item>
-);
-
-export const SelectTable = ({
-  name,
-  label,
   required,
-  width,
   handleCheck,
-  value,
-}: SelTableElementProps) => (
+}: FormElementProps) => (
   <Col span={width ?? 12}>
-    <Form.Item
-      name={name}
-      label={label}
-      rules={[{ required: required, message: "Vui lòng nhập" }]}
-      style={{ marginBottom: 10 }}
-    >
-      <Space.Compact style={{ width: "100%" }}>
-        <Search allowClear onSearch={handleCheck} readOnly value={value} />
-      </Space.Compact>
+    <Form.Item {...formProps(name, label, type, required, value)}>
+      {type === "date" ? (
+        <DatePicker
+          disabled={disabled}
+          title="Từ ngày"
+          style={{ width: "100%", textAlign: "center" }}
+          format={"YYYY-MM-DD HH:mm:ss"}
+          showTime={{ format: "HH:mm:ss" }}
+        />
+      ) : type === "select" ? (
+        <Select
+          disabled={disabled}
+          options={optlist}
+          showSearch
+          optionFilterProp="label"
+          allowClear
+        />
+      ) : type === "checkbox" ? (
+        <Checkbox.Group>
+          <Row gutter={[8, 12]}>
+            {optlist?.map((i) => (
+              <Col span={col ?? 12}>
+                <Checkbox value={i.value}>{i.label}</Checkbox>
+              </Col>
+            ))}
+          </Row>
+        </Checkbox.Group>
+      ) : type === "seltable" ? (
+        <SelectTable handleCheck={handleCheck} value={value} />
+      ) : type === "number" ? (
+        <InputNumber style={{ width: "100%" }} min={0} disabled={disabled} />
+      ) : (
+        <Input disabled={disabled} />
+      )}
     </Form.Item>
   </Col>
 );

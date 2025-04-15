@@ -2,42 +2,50 @@ import { Checkbox, Select, DatePicker, InputNumber } from "antd";
 import { RenderCellProps, RenderEditCellProps } from "react-data-grid";
 import { SelectArrType } from "../../lib/arrList";
 import dayjs from "dayjs";
+import { findLabel } from "../../lib/function";
+import { useState } from "react";
 
-export const CheckBoxCell = (
-  { row, column, onRowChange }: RenderCellProps<any>,
-) => (
+export const CheckBoxCell = ({
+  row,
+  column: { key },
+  onRowChange,
+}: RenderCellProps<any>) => (
   <Checkbox
-    defaultChecked={Boolean(row[column.key])}
-    onChange={(e) => {
-      onRowChange({ ...row, [column.key]: e.target.checked })
+    defaultChecked={Boolean(row[key])}
+    onChange={({ target }) => {
+      onRowChange({ ...row, [key]: target.checked });
     }}
   />
 );
 
 export const SelectShowCell = (
-  { row, column }: RenderCellProps<any>,
+  { row, column: { key } }: RenderCellProps<any>,
   optList: SelectArrType[]
-) => <span>{optList.find((i) => i.value == row[column.key])?.label}</span>;
+) => <span>{findLabel(optList, row[key])}</span>;
 
 export const SelectCell = (
-  { row, column, onRowChange }: RenderEditCellProps<any>,
-  optList: SelectArrType[],
+  { row, column: { key }, onRowChange }: RenderEditCellProps<any>,
+  optList: SelectArrType[]
 ) => (
   <Select
     options={optList}
     showSearch
+    variant="borderless"
     optionFilterProp="label"
-    defaultValue={row[column.key]}
+    defaultValue={row[key]}
     style={{ width: "100%" }}
-    onChange={(value) =>{
-      onRowChange({ ...row, [column.key]: value }, true)
+    onChange={(value) => {
+      onRowChange({ ...row, [key]: value }, true);
     }}
   />
 );
 
-export const DateShowCell = ({ row, column }: RenderCellProps<any>) => (
+export const DateShowCell = ({
+  row,
+  column: { key },
+}: RenderCellProps<any>) => (
   <span>
-    {new Date(row[column.key])
+    {new Date(row[key])
       .toLocaleString("zh-CN", {
         year: "numeric",
         month: "2-digit",
@@ -50,35 +58,41 @@ export const DateShowCell = ({ row, column }: RenderCellProps<any>) => (
   </span>
 );
 
-export const DateEditCell = (
-  { row, column, onRowChange }: RenderEditCellProps<any>,
-) => (
+export const DateEditCell = ({
+  row,
+  column: { key },
+  onRowChange,
+}: RenderEditCellProps<any>) => (
   <DatePicker
-    defaultValue={dayjs(row[column.key])}
+    variant="borderless"
+    defaultValue={dayjs(row[key])}
     style={{ width: "100%", textAlign: "center" }}
     format={"YYYY-MM-DD HH:mm:ss"}
     showTime={{ format: "HH:mm:ss" }}
     onChange={(date) => {
-      if (column.key == "expireDate") {
+      if (key == "expireDate") {
         if (date < dayjs(row.applyDate)) {
-          alert('Ngày hết hạn phải lớn hơn ngày hiệu lực')
-          return
+          alert("Ngày hết hạn phải lớn hơn ngày hiệu lực");
+          return;
         }
       }
-      onRowChange({ ...row, [column.key]: date.toISOString() }, true);
+      onRowChange({ ...row, [key]: date.toISOString() }, true);
     }}
   />
 );
 
-export const NumEditCell = (
-  { row, column, onRowChange }: RenderEditCellProps<any>,
-) => (
+export const NumEditCell = ({
+  row,
+  column: { key },
+  onRowChange,
+}: RenderEditCellProps<any>) => (
   <InputNumber
-    defaultValue={row[column.key]}
-    style={{ width: "100%", textAlign: "center" }}
-    onChange={(value) => {
-      onRowChange({ ...row, [column.key]: value }, true);
+    defaultValue={row[key]}
+    style={{ width: "100%", justifyContent: "right", textAlign: "right" }}
+    variant="borderless"
+    onPressEnter={() => document.activeElement?.blur()}
+    onBlur={({ currentTarget: {value}}) => {
+      onRowChange({ ...row, [key]: Number(value) }, true);
     }}
   />
 );
-

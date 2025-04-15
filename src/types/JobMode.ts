@@ -1,9 +1,8 @@
 import { extraModeList } from "../lib/arrList";
 import { AdjustColumn } from "../component/ui/column";
+import RowTypes from "./RowTypes";
 
-export default interface JobMode {
-  _id: string;
-  rowID: number;
+export default interface JobModeTYPE extends RowTypes {
   jobModeCode: string;
   jobModeName: string;
   isLoLo: boolean;
@@ -15,7 +14,7 @@ export default interface JobMode {
 }
 
 export const columns: AdjustColumn[] = [
-  { key: "jobModeCode", name: "Mã phương án", width: "15%", type: "string" },
+  { key: "jobModeCode", name: "Mã phương án", width: "15%", type: "string", primary: true },
   { key: "jobModeName", name: "Tên phương án", width: "15%", type: "string" },
   { key: "isLoLo", name: "Nâng hạ", type: "boolean" },
   { key: "isCfsStuff", name: "Đóng hàng", type: "boolean" },
@@ -31,3 +30,9 @@ export const columns: AdjustColumn[] = [
     optlist: extraModeList,
   },
 ];
+
+export const JobModeCol_Commodity: AdjustColumn[] = [
+  { key: "jobModeCode", name: "Mã phương án", width: "30%", type: "string", primary: true },
+  { key: "jobModeName", name: "Tên phương án", width: "35%", type: "string" },
+  { key: "quantity", name: "Số lượng", width: "25%", type: "string" },
+]

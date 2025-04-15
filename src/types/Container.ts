@@ -2,20 +2,20 @@ import { AdjustColumn } from "../component/ui/column";
 import { SelectArrType } from "../lib/arrList";
 import { loadDataSelect } from "../lib/loading";
 
-export default interface Container {
+export default interface ContainerTYPE {
   _id: string;
   containerNo: string;
-  vesselKey	: string;
-  classCode	: string;
-  operationCode	: string;
+  vesselKey: string;
+  classCode: string;
+  operationCode: string;
   fe: string;
-  containerStatusCode	: string;
-  cargoTypeCode	: string;
-  commodity	: string;
-  localSizetype	: string;
-  isoSizetype	: string;
+  containerStatusCode: string;
+  cargoTypeCode: string;
+  commodity: string;
+  localSizetype: string;
+  isoSizetype: string;
   isLocalForeign: string;
-  jobModeCodeIn	: string;
+  jobModeCodeIn: string;
   methodCodeIn: string;
   dateIn: Date;
   dateOut: Date;
@@ -33,19 +33,12 @@ export default interface Container {
   terHold: boolean;
   isReturnBack: boolean;
   isSpecialWarning: boolean;
-  isTruckBarge: string
+  isTruckBarge: string;
 }
 
-export const companyList: SelectArrType[] = await loadDataSelect("operations");
-
 export const columns: AdjustColumn[] = [
-  { key: "containerNo", name: "Số container", type: "string" },
+  { key: "containerNo", name: "Số container", type: "string", primary: true },
   { key: "vesselKey", name: "Mã tàu", type: "string" },
-  {
-    key: "operationCode",
-    name: "Hãng khai thác",
-    type: "string",
-    optlist: companyList,
-  },
+  { key: "operationCode", name: "Hãng khai thác", type: "string" },
   { key: "localSizetype", name: "Kích cỡ nội bộ", type: "string" },
 ];

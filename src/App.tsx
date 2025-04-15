@@ -4,7 +4,7 @@ import Footer from "./component/Footer";
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import Home from "./pages/Home";
 import E404 from "./pages/E404";
-import { ArrCategories } from "./lib/listcategories";
+import { ArrCategories } from "./lib/listCategories";
 
 const { Content } = Layout;
 
@@ -26,7 +26,8 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route index element={<Home />} />
               {ArrCategories.map(({ sub }) =>
-                sub.filter(({ page }) => page != undefined)
+                sub
+                  .filter(({ page }) => page)
                   .map(({ link, page }) => <Route path={link} element={page} />)
               )}
             </Route>

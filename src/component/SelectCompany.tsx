@@ -31,7 +31,7 @@ export default function SelectCompany ({
       <p>Chọn hãng khai thác:</p>
       <Form style={{ display: "block", alignItems: "center" }}>
         <Select
-          style={{ width: "90%" }}
+          style={{ width: "100%" }}
           options={companyList}
           defaultValue={companyList}
           showSearch

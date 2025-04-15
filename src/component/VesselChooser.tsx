@@ -1,6 +1,10 @@
 import { Modal } from "antd";
 import { columns } from "../types/Vessel";
 import DataList from "./DataList";
+import { useState, useEffect } from "react";
+import loadData from "../lib/LoadTable";
+
+const category = "vessels";
 
 interface VesselChooserProps {
   open: boolean;
@@ -8,7 +12,17 @@ interface VesselChooserProps {
   onSave: (values: any) => void;
 }
 
-export default function VesselChooser({ open, onClose, onSave }: Readonly<VesselChooserProps>) {
+export default function VesselChooser({
+  open,
+  onClose,
+  onSave,
+}: Readonly<VesselChooserProps>) {
+  const [rows, setRows] = useState([]);
+  const [updateStatus, setUpdateStatus] = useState(false);
+  useEffect(() => {
+    loadData(category, columns, setRows);
+    setUpdateStatus(false);
+  }, [updateStatus]);
   const onFinish = (values: any) => {
     onSave(values); // Gọi hàm lưu dữ liệu
     onClose(); // Đóng modal
@@ -22,9 +36,11 @@ export default function VesselChooser({ open, onClose, onSave }: Readonly<Vessel
       onCancel={onClose}
     >
       <DataList
-        category="vessels"
+        category={category}
         columns={columns}
-        buttonList={[]}
+        exRows={rows}
+        setUpdateStatus={setUpdateStatus}
+        updateStatus={updateStatus}
         tableMode="choose"
         setResult={onFinish}
       />
