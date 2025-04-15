@@ -11,11 +11,9 @@ import { cancelItem } from "../lib/api";
 import { AddRowDialog, Confirm } from "./ui/Popup";
 import {
   exportRawExcel,
-  exportToCSV,
-  exportToExcel,
-  importFromCSV,
+  exportFile,
   importFromExcel,
-} from "../lib/exportXLSX";
+} from "../lib/handleFile";
 import {
   addRow,
   deleteRow,
@@ -31,7 +29,7 @@ import Booking from "../types/Booking";
 import ButtonZone from "./ButtonZone";
 import { filterFunc, filterVal, search, sortFunc } from "../lib/sortAndFilter";
 import { findRow, checkSame } from "../lib/function";
-import { FilterContext, MessageContext } from "../lib/context";
+import { FilterContext } from "../lib/context";
 
 export default function DataList<A extends RowTypes>({
   category,
@@ -183,11 +181,8 @@ export default function DataList<A extends RowTypes>({
 
   const handleRawExcel = () => exportRawExcel(columns, `Mẫu ${Filename}.xlsx`);
 
-  const handleExportExcel = () =>
-    exportToExcel(columns, rows, `${Filename}.xlsx`);
-
-  const handleExportCSV = () =>
-    exportToCSV(columns, rows, `${Filename}.csv`);
+  const handleExport = (type: string) =>
+    exportFile(type, columns, rows, `${Filename}.${type}`);
 
   const handleFileChange = ({ file }: any) => {
     const selectedFile = file?.originFileObj; // Lấy đối tượng File từ `originFileObj`
@@ -270,8 +265,7 @@ export default function DataList<A extends RowTypes>({
             handleUpdate,
             handleRawExcel,
             handleFileChange,
-            handleExportExcel,
-            handleExportCSV,
+            handleExport,
             buttonList
           )}
         </Col>
