@@ -2,6 +2,10 @@ import dayjs, { Dayjs } from "dayjs";
 import { AdjustColumn } from "../component/ui/column";
 import { SelectArrType } from "./arrList";
 
+export const xlsxType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+export const xlsType = "application/vnd.ms-excel"
+export const csvType = "text/csv"
+
 export const findRow = (rows: any[], x: string) =>
   rows.find(({ _id }) => _id === x);
 

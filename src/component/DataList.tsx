@@ -5,14 +5,14 @@ import {
 } from "react";
 import { DataGrid, RowsChangeData, SortColumn } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
-import { Input, message, Row, Col, Button, Space } from "antd";
+import { Input, message, Row, Col, Button, Space, UploadFile } from "antd";
 import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
 import { cancelItem } from "../lib/api";
 import { AddRowDialog, Confirm } from "./ui/Popup";
 import {
   exportRawExcel,
   exportFile,
-  importFromExcel,
+  importFile,
 } from "../lib/handleFile";
 import {
   addRow,
@@ -30,6 +30,7 @@ import ButtonZone from "./ButtonZone";
 import { filterFunc, filterVal, search, sortFunc } from "../lib/sortAndFilter";
 import { findRow, checkSame } from "../lib/function";
 import { FilterContext } from "../lib/context";
+import { UploadChangeParam } from "antd/es/upload";
 
 export default function DataList<A extends RowTypes>({
   category,
@@ -133,7 +134,7 @@ export default function DataList<A extends RowTypes>({
       }
       case 3:
         setDialog(0);
-        importFromExcel(columns, rows, file, setRows, setFile, messageApi);
+        importFile(columns, rows, file, setRows, setFile, messageApi);
         break;
       case 4:
         setDialog(0);
@@ -184,8 +185,8 @@ export default function DataList<A extends RowTypes>({
   const handleExport = (type: string) =>
     exportFile(type, columns, rows, `${Filename}.${type}`);
 
-  const handleFileChange = ({ file }: any) => {
-    const selectedFile = file?.originFileObj; // Lấy đối tượng File từ `originFileObj`
+  const handleFileChange = ({ file }: UploadChangeParam<UploadFile<any>>) => {
+    const selectedFile = file.originFileObj; // Lấy đối tượng File từ `originFileObj`
     const status = file?.status;
     console.log(status);
     if (selectedFile) {

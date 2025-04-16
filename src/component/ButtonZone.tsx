@@ -13,11 +13,11 @@ import {
   SaveOutlined,
   PlusCircleOutlined,
   FileExcelOutlined,
-  ExportOutlined,
   ImportOutlined,
   DownOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
+import { csvType, xlsType, xlsxType } from "../lib/function";
 
 export default function ButtonZone(
   setAddRowDialog: (dialog: boolean) => void,
@@ -30,24 +30,24 @@ export default function ButtonZone(
 ) {
   const [messageApi, contextHolder] = message.useMessage();
   const checkFileType = (file: File) => {
-    const isXLSX =
-      file.type ==
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    const isXLS = file.type == "application/vnd.ms-excel";
-    const isCSV = file.type == "text/csv";
-    if (!isXLSX && !isXLS && !isCSV) {
-      messageApi.error("Chỉ chấp nhận tệp xls/xlsx hoặc csv");
+    const isValidFileType = [xlsxType, xlsType, csvType].includes(file.type)
+    if (!isValidFileType) {
+      messageApi.error("Chỉ chấp nhận tệp xls, xlsx hoặc csv");
     }
-    return isXLSX || isXLS || isCSV || Upload.LIST_IGNORE;
+    return isValidFileType || Upload.LIST_IGNORE;
   };
   const handleDownloadClick: MenuProps["onClick"] = (e) => {
-    message.info("Click on menu item.");
     handleExport(e.key);
   };
   const items: MenuProps["items"] = [
     {
-      label: "Xuất Excel",
+      label: "Xuất Excel 2007+ (XLSX)",
       key: "xlsx",
+      icon: <FileExcelOutlined />,
+    },
+    {
+      label: "Xuất Excel 97-2003 (XLS)",
+      key: "xls",
       icon: <FileExcelOutlined />,
     },
     {
@@ -105,12 +105,13 @@ export default function ButtonZone(
       {buttonList?.includes("upload") && (
         <Upload
           beforeUpload={checkFileType}
-          accept={".xlsx, .xls"}
+          accept={".xlsx, .xls, .csv"}
+          maxCount={1}
           onChange={handleFileChange}
           showUploadList={false}
         >
           <Button type="default" icon={<ImportOutlined />}>
-            Nhập Excel
+            Nhập file
           </Button>
         </Upload>
       )}
